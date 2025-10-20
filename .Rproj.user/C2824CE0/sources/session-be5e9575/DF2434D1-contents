@@ -1,4 +1,4 @@
-me.ar <- function(be, mu, x, cov_be = NULL) {
+me.ar <- function(be, mu, x, covbe = NULL) {
 
   # Validate inputs
   n <- dim(mu)[1]
@@ -37,9 +37,6 @@ me.ar <- function(be, mu, x, cov_be = NULL) {
 
   se.ame <- NULL
   if ( !is.null(covbe) ) {
-    id <- matrix( 1: prod( dim(be) ), ncol = d )
-    id <- id[1, ]
-    cov_be <- cov_be[-id, -id]
     # ===== STEP 2: Calculate average marginal effects =====
     # ===== STEP 3: Calculate Jacobian for AME =====
     # Pre-calculate derivatives of μ with respect to β
@@ -133,7 +130,7 @@ me.ar <- function(be, mu, x, cov_be = NULL) {
       }
     }
 
-    cov_ame <- J_ame %*% cov_be %*% t(J_ame)
+    cov_ame <- J_ame %*% covbe %*% t(J_ame)
     se_vec <- sqrt(diag(cov_ame))
     se.ame <- t( matrix(se_vec, nrow = D, ncol = p, byrow = FALSE) )
     dimnames(se.ame) <- list(component = comp_names, covariate = cov_names)

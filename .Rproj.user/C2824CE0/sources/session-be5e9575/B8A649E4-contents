@@ -65,9 +65,6 @@ me.aslx <- function(be, gama, mu, x, coords, k = 10, cov_theta = NULL) {
 
   if ( !is.null(cov_theta) ) {
 
-  id <- matrix( 1: prod( dim(be) ), ncol = d )
-  id <- id[1, ]
-  cov_theta <- cov_theta[-id, -id]
   # Pre-calculate derivatives
   dmu_dbeta <- array(0, dim = c(n, D, d, p))
   dmu_dgamma <- array(0, dim = c(n, D, d, p))

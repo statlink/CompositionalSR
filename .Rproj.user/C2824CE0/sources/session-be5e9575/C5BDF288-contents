@@ -1,0 +1,97 @@
+alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL) {
+
+  reg <- function(para, ya, ax, a, ha, d, D) {
+    be <- matrix(para, ncol = d)
+    zz <- cbind( 1, exp(ax %*% be) )
+    ta <- rowSums(zz)
+    za <- zz / ta
+    ma <- ( D / a * za - 1/a ) %*% ha
+    as.vector(ya - ma)
+  }
+
+  runtime <- proc.time()
+
+  W <- CompositionalSR::contiguity(coords, k)
+  if ( is.null(yb) ) {
+    ya <- Compositional::alfa(y, a)$aff
+  } else  ya <- yb
+  x <- model.matrix( ya ~., data.frame(x) )
+  Wx <- W %*% x[, -1]
+  X <- cbind(x, Wx)
+
+  D <- dim(y)[2]
+  d <- D - 1  ## dimensionality of the simplex
+
+  if ( a <= 1e-5 ) {
+    mod <- Compositional::comp.reg(y, X[, -1], yb = yb)
+    be <- mod$be
+    if ( !is.null(seb) )  seb <- mod$seb
+    runtime <- mod$runtime
+
+  } else {
+    aX <- a * X
+    ha <- t( Compositional::helm(D) )
+    ini <- as.vector( solve(crossprod(X), crossprod(X, ya) ) )
+    suppressWarnings({
+      mod <- minpack.lm::nls.lm( par = ini, fn = reg, ya = ya, ax = aX, a = a, ha = ha, d = d, D = D,
+                                 control = minpack.lm::nls.lm.control(maxiter = 10000) )
+    })
+    be <- matrix(mod$par, ncol = d)
+  }  ## end if (a == 0)
+
+  runtime <- proc.time() - runtime
+
+  est <- NULL
+  if ( !is.null(xnew) ) {
+
+    cordsnew <- pi * coordsnew / 180  ## from degrees to rads
+    a1 <- sin(cordsnew[, 1])
+    coordnew <- cbind( cos(cordsnew[, 1]), a1 * cos(cordsnew[, 2]), a1 * sin(cordsnew[, 2]) )
+    cords <- pi * coords / 180  ## from degrees to rads
+    a1 <- sin(cords[, 1])
+    coord <- cbind( cos(cords[, 1]), a1 * cos(cords[, 2]), a1 * sin(cords[, 2]) )
+    Wnew <- Rfast::dista(coordnew, coord, square = TRUE)
+
+    b <- Rfast::rowOrder(Wnew)
+    b[b > k + 1] <- 0
+    b[b > 0] <- 1
+    Wnew <- 1 / Wnew
+    Wnew[ is.infinite(Wnew) ] <- 0
+    Wnew <- b * Wnew
+    b <- NULL
+    Wnew <- Wnew / Rfast::rowsums(Wnew)
+
+    xnew <- model.matrix(~., data.frame(xnew) )
+    Wxnew <- Wnew %*% x[, -1]
+    xnew <- cbind(xnew, Wxnew)
+    est <- cbind( 1, exp(xnew %*% be) )
+    est <- est/Rfast::rowsums(est)
+  }
+
+  p <- dim(x)[2] - 1
+  if ( is.null( colnames(x) ) ) {
+    rownames(be) <- c("constant", paste("X", 1:p, sep = ""), paste("WX", 1:p, sep = "") )
+  } else  rownames(be)  <- c("constant", colnames(x)[-1], paste("W", colnames(x)[-1], sep = "") )
+
+  if ( covb ) {
+    covb <- try( solve(mod$hessian), silent = TRUE )
+    if ( !identical( class(covb), "try-error" ) ) {
+      a1 <- paste("Y", 2:D, sep = "")
+      a2 <- rownames(be)
+      rownames(covb) <- colnames(covb) <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
+      ind <- matrix(1: dim(covb)[1], ncol=d )
+      ind <- as.vector( ind[1:(p + 1), ] )
+      cov1 <- cbind( covb[ind, ind], covb[ind, -ind] )
+      cov2 <- cbind( covb[-ind, ind], covb[-ind, -ind] )
+      covb <- rbind(cov1, cov2)
+    } else  covb <- NULL
+  }
+
+  gama <- be[(p + 2) : (2 * p + 1), ]
+  be <- be[1:(p + 1), ]
+
+  list(runtime = runtime, be = be, gama = gama, covb = covb, est = est)
+}
+
+
+
