@@ -1,0 +1,5 @@
+spat.folds <- function(coords, nfolds = 10) {
+  data_sf <- sf::st_as_sf(as.data.frame(coords[, 2:1]), coords = c("longitude", "latitude"), crs = 4326)
+  cv_blocks <- blockCV::cv_spatial( x = data_sf, k = nfolds, size = 1000, hexagon = FALSE, report = FALSE,
+                                    selection = "random", iteration = 100, progress = FALSE, plot = FALSE )$folds_list
+}

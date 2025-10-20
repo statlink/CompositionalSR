@@ -1,0 +1,78 @@
+gwar <- function(y, x, a, coords, h, yb = NULL, nc = 1) {
+
+  regwei <- function(para, ya, ax, a, wei, ha, d, D) {
+    be <- matrix(para, ncol = d)
+    zz <- cbind( 1, exp(ax %*% be) )
+    ta <- rowSums(zz)
+    za <- zz / ta
+    ma <- ( D / a * za - 1/a ) %*% ha
+    as.vector( wei * (ya - ma ) )
+  }
+
+  runtime <- proc.time()
+
+  colnames(coords) <- c("latitude", "longitude")
+  cords <- pi * coords / 180  ## from degrees to rads
+  a1 <- sin(cords[, 1])
+  coord <- rbind( cos(cords[, 1]), a1 * cos(cords[, 2]), a1 * sin(cords[, 2]) )
+  be <- list()
+
+  if ( is.null(yb) ) {
+    ya <- Compositional::alfa(y, a)$aff
+  } else  ya <- yb
+  x <- model.matrix( ya ~., data.frame(x) )
+  ax <- a * x
+
+  D <- dim(y)[2]  ;  p <- dim(x)[2]
+  d <- D - 1  ## dimensionality of the simplex
+  n <- dim(y)[1]  ## sample size
+  be <- matrix(nrow = n, ncol = p * d)
+  est <- matrix(nrow = n, ncol = D)
+  ha <- t( Compositional::helm(D) )
+  ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
+  h <- h^2
+
+  if ( nc <= 1 ) {
+    for ( i in 1:n ) {
+      di <- Rfast::eachcol.apply( coord, coord[, i] ) - 1
+      wei <- sqrt( exp(di / h) )
+      ind <- which(wei > 1e-6)
+      suppressWarnings( {
+      mod <- minpack.lm::nls.lm( par = ini, fn = regwei, ya = ya[ind, ], ax = ax[ind, ], a = a, wei = wei[ind], 
+                                 ha = ha, d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 10000) )
+      } )
+      be[i, ] <- as.vector(mod$par)
+      be2 <- matrix(mod$par, ncol = d)
+      est2 <- cbind( 1, exp(x[i, ] %*% be2) )
+      est[i, ] <- est2 / Rfast::rowsums(est2)
+    }
+  } else {
+
+    requireNamespace("doParallel", quietly = TRUE)
+    cl <- parallel::makePSOCKcluster(nc)
+    doParallel::registerDoParallel(cl)
+# .packages = c("Rfast", "minpack.lm"), .export = c("eachcol.apply", "nls.lm", "nls.lm.control", "rowsums")
+    ep <- foreach::foreach( i = 1:n, .combine = rbind ) %dopar% {
+      di <- Rfast::eachcol.apply( coord, coord[, i] ) - 1
+      wei <- sqrt( exp(di / h) )
+      ind <- which(wei > 1e-6)
+      suppressWarnings( {
+      mod <- minpack.lm::nls.lm( par = ini, fn = regwei, ya = ya[ind, ], ax = ax[ind, ], a = a, wei = wei[ind], 
+                                 ha = ha, d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 10000) )
+      } )
+      be <- as.vector(mod$par)
+      be2 <- matrix(mod$par, ncol = d)
+      est2 <- cbind( 1, exp(x[i, ] %*% be2) )
+      est <- est2 / Rfast::rowsums(est2)
+      return( c( be, est ) )
+     }  ##  end foreach
+    parallel::stopCluster(cl)
+    be <- ep[, 1:(p * d)]
+    est <- ep[, -c( 1:(p * d) )]
+  }
+  runtime <- proc.time() - runtime
+
+  list(runtime = runtime, be = be, est = est)
+}
+
+

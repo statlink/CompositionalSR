@@ -1,0 +1,55 @@
+\name{Spatial k-folds}
+\alias{spat.folds}
+\title{
+Spatial k-folds
+}
+
+\description{
+Spatial k-folds.
+}
+
+\usage{
+spat.folds(coords, nfolds = 10)
+}
+
+\arguments{
+\item{coords}{
+A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
+}
+\item{nfolds}{
+The number of spatial folds to create.
+}
+}
+
+\details{
+Folds of data are created based on their coordinates. For more information see the package \bold{blockCV}.
+}
+
+\value{
+A list with nfolds elements. Each elements contains a list with two elements, the first is the indices of the training set and the second contains the indices of the test set.
+}
+
+%\references{
+%}
+
+\author{
+Michail Tsagris.
+
+R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
+}
+
+%\note{
+%%  ~~further notes~~
+%}
+
+\seealso{
+\code{\link{cv.alfaslx}, \link{me.aslx}, \link{gwar}, \link{alfa.reg}
+}
+}
+
+\examples{
+data(fadn)
+coords <- fadn[, 1:2]
+folds <- spat.folds(coords, nfolds = 10)
+}
+

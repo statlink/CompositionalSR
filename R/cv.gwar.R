@@ -1,0 +1,39 @@
+cv.gwar <- function(y, x, a = c(0.1, 0.25, 0.5, 0.75, 1), coords, h, nfolds = 10, folds = NULL) {
+
+  if ( min(y) == 0 )  a <- a[a>0]
+  apa <- proc.time()
+  if ( is.null(folds) )  folds <- CompositionalSR::spat.folds(coords, nfolds = nfolds)
+  
+  nfolds <- length(folds)
+  la <- length(a)
+  lh <- length(h)
+  kula <- matrix(0, nrow = la, ncol = lh)
+  rownames(kula) <- paste("alpha=", a, sep = "")
+  colnames(kula) <- paste("h=", h, sep = "")
+
+  for ( m in 1:nfolds ) {
+    xtrain <- x[folds[[ m ]][[ 1 ]], ]
+    ytrain <- y[ folds[[ m ]][[ 1 ]], ]
+    xtest <- x[ folds[[ m ]][[ 2 ]], ]
+    ytest <- y[ folds[[ m ]][[ 2 ]], ]
+    coordstrain <- coords[folds[[ m ]][[ 1 ]], ]
+    coordstest <- coords[folds[[ m ]][[ 2 ]], , drop = FALSE]
+    yest <- gwar.pred(ytrain, xtrain, a, coordstrain, h, xtest, coordstest)$est
+    for ( i in 1:la ) {
+      for ( j in 1:lh ) {
+        kl <- ytest * log( ytest / yest[[ i ]][[ j ]] )
+        kl[ is.infinite(kl) ] <- NA
+        kula[i, j] <- kula[i, j] + sum(kl, na.rm = TRUE) / dim(ytest)[1]
+      }
+    }
+  }
+  runtime <- proc.time() - apa
+  kula <- kula / m
+
+  pou <- which( kula == min(kula), arr.ind = TRUE)
+  opt <- c( kula[pou], a[ pou[1] ], h[ pou[2] ] )
+  names(opt) <- c("KLD", "alpha", "h")
+  list(runtime = runtime, perf = kula, opt = opt)
+}
+
+

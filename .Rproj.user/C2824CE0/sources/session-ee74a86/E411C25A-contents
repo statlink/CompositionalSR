@@ -1,0 +1,224 @@
+me.aslx <- function(be, gama, mu, x, coords, k = 10, cov_theta = NULL) {
+
+  n <- dim(mu)[1]
+  D <- dim(mu)[2]
+  d <- D - 1
+  x <- as.matrix(x)
+  p <- dim(x)[2]
+  W <- CompositionalSR::contiguity(coords, k)
+  Wx <- W %*% x
+
+  comp_names <- paste0("Component_", 1:D)
+  cov_names <- colnames(X)
+  if (is.null(cov_names)) cov_names <- paste0("X", 1:p)
+  obs_names <- paste0("Obs_", 1:n)
+
+  be <- t(be)[, -1, drop = FALSE]
+  if ( p == 1 ) {
+    gama <- as.matrix(gama)
+  } else  gama <- t(gama)
+  ind <- matrix(1:(d * (p + 1) ), ncol = d)
+  ind <- ind[1, ]
+  cov_theta <- cov_theta[-ind, -ind]
+
+  # Calculate direct effects
+  direct_array <- array(0, dim = c(n, D, p))
+  for (k in 1:p) {
+    com <- numeric(n)
+    for (j in 1:d) {
+      com <- com + be[j, k] * mu[, j+1]
+    }
+    direct_array[, 1, k] <-  -mu[, 1] * com
+    for (i in 2:D) {
+      direct_array[, i, k] <- mu[, i] * (be[i-1, k] - com)
+    }
+  }
+
+  # Calculate indirect effects
+  indirect_array <- array(0, dim = c(n, D, p))
+  for (k in 1:p) {
+    com <- numeric(n)
+    for (j in 1:d) {
+      com <- com + gama[j, k] * mu[, j+1]
+    }
+    indirect_array[, 1, k] <- -mu[, 1] * com
+    for (i in 2:D) {
+      indirect_array[, i, k] <- mu[, i] * (gama[i-1, k] - com)
+    }
+  }
+
+  # Total effects
+  total_array <- direct_array + indirect_array
+
+  dimnames(direct_array) <- list(observation = obs_names, component = comp_names, covariate = cov_names)
+  dimnames(indirect_array) <- list(observation = obs_names, component = comp_names, covariate = cov_names)
+  dimnames(total_array) <- list(observation = obs_names, component = comp_names, covariate = cov_names)
+
+  # Average marginal effects
+  ame_direct <- apply(direct_array, c(2, 3), mean)
+  ame_indirect <- apply(indirect_array, c(2, 3), mean)
+  ame_total <- apply(total_array, c(2, 3), mean)
+
+  se.amedir <- NULL
+  se.ameindir <- NULL
+  se.ametotal <- NULL
+
+  if ( !is.null(cov_theta) ) {
+
+  # Pre-calculate derivatives
+  dmu_dbeta <- array(0, dim = c(n, D, d, p))
+  dmu_dgamma <- array(0, dim = c(n, D, d, p))
+
+  for (i in 1:n) {
+    mu_i <- mu[i, ]
+    x_i <- x[i, ]
+    wx_i <- Wx[i, ]
+
+    for (j in 1:D) {
+      for (k in 1:d) {
+        for (l in 1:p) {
+          if (j == 1) {
+            dmu_dbeta[i, 1, k, l] <- -mu_i[1] * mu_i[k+1] * x_i[l]
+            dmu_dgamma[i, 1, k, l] <- -mu_i[1] * mu_i[k+1] * wx_i[l]
+          } else if (j == k + 1) {
+            dmu_dbeta[i, j, k, l] <- mu_i[j] * (1 - mu_i[j]) * x_i[l]
+            dmu_dgamma[i, j, k, l] <- mu_i[j] * (1 - mu_i[j]) * wx_i[l]
+          } else {
+            dmu_dbeta[i, j, k, l] <- -mu_i[j] * mu_i[k+1] * x_i[l]
+            dmu_dgamma[i, j, k, l] <- -mu_i[j] * mu_i[k+1] * wx_i[l]
+          }
+        }
+      }
+    }
+  }
+
+  # Calculate Jacobian
+  J_ame <- matrix(0, nrow = 3 * D * p, ncol = 2 * d * p)
+
+  for (i in 1:n) {
+    mu_i <- mu[i, ]
+    row_idx <- 1
+
+    # Direct effects Jacobian
+    for (comp in 1:D) {
+      for (cov in 1:p) {
+        for (m in 1:d) {
+          for (s in 1:p) {
+            beta_col <- (s - 1) * d + m
+
+            if (comp == 1) {
+              if (s == cov) {
+                J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] - mu_i[1] * mu_i[m+1] / n
+              }
+              common_sum <- 0
+              for (j in 1:d) {
+                common_sum <- common_sum + be[j, cov] * mu_i[j+1]
+              }
+              J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] - dmu_dbeta[i, 1, m, s] * common_sum / n
+              for (j in 1:d) {
+                J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] - mu_i[1] * be[j, cov] * dmu_dbeta[i, j+1, m, s] / n
+              }
+            } else {
+              if (s == cov) {
+                if (m == comp - 1) {
+                  J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] + mu_i[comp] / n
+                }
+                J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] - mu_i[comp] * mu_i[m+1] / n
+              }
+              bracket_term <- be[comp-1, cov]
+              for (j in 1:d) {
+                bracket_term <- bracket_term - be[j, cov] * mu_i[j+1]
+              }
+              J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] + dmu_dbeta[i, comp, m, s] * bracket_term / n
+              for (j in 1:d) {
+                J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] - mu_i[comp] * be[j, cov] * dmu_dbeta[i, j+1, m, s] / n
+              }
+            }
+          }
+        }
+        row_idx <- row_idx + 1
+      }
+    }
+
+    # Indirect effects Jacobian
+    for (comp in 1:D) {
+      for (cov in 1:p) {
+        for (m in 1:d) {
+          for (s in 1:p) {
+            gamma_col <- d * p + (s - 1) * d + m
+
+            if (comp == 1) {
+              if (s == cov) {
+                J_ame[row_idx, gamma_col] <- J_ame[row_idx, gamma_col] - mu_i[1] * mu_i[m+1] / n
+              }
+              common_sum <- 0
+              for (j in 1:d) {
+                common_sum <- common_sum + gama[j, cov] * mu_i[j+1]
+              }
+              J_ame[row_idx, gamma_col] <- J_ame[row_idx, gamma_col] - dmu_dgamma[i, 1, m, s] * common_sum / n
+              for (j in 1:d) {
+                J_ame[row_idx, gamma_col] <- J_ame[row_idx, gamma_col] - mu_i[1] * gama[j, cov] * dmu_dgamma[i, j+1, m, s] / n
+              }
+            } else {
+              if (s == cov) {
+                if (m == comp - 1) {
+                  J_ame[row_idx, gamma_col] <- J_ame[row_idx, gamma_col] + mu_i[comp] / n
+                }
+                J_ame[row_idx, gamma_col] <- J_ame[row_idx, gamma_col] - mu_i[comp] * mu_i[m+1] / n
+              }
+              bracket_term <- gama[comp-1, cov]
+              for (j in 1:d) {
+                bracket_term <- bracket_term - gama[j, cov] * mu_i[j+1]
+              }
+              J_ame[row_idx, gamma_col] <- J_ame[row_idx, gamma_col] + dmu_dgamma[i, comp, m, s] * bracket_term / n
+              for (j in 1:d) {
+                J_ame[row_idx, gamma_col] <- J_ame[row_idx, gamma_col] - mu_i[comp] * gama[j, cov] * dmu_dgamma[i, j+1, m, s] / n
+              }
+            }
+          }
+        }
+        row_idx <- row_idx + 1
+      }
+    }
+
+    # Total effects Jacobian
+    start_direct <- 1
+    end_direct <- D * p
+    start_indirect <- D * p + 1
+    end_indirect <- 2 * D * p
+    start_total <- 2 * D * p + 1
+    end_total <- 3 * D * p
+
+    J_ame[start_total:end_total, ] <- J_ame[start_direct:end_direct, ] + J_ame[start_indirect:end_indirect, ]
+  }
+
+  # Calculate covariance
+  cov_ame <- J_ame %*% cov_theta %*% t(J_ame)
+  se_vec <- sqrt( diag(cov_ame) )
+
+  se_direct_vec <- se_vec[1:(D*p)]
+  se_indirect_vec <- se_vec[(D*p+1):(2*D*p)]
+  se_total_vec <- se_vec[(2*D*p+1):(3*D*p)]
+
+  se_direct <- matrix(se_direct_vec, nrow = D, ncol = p, byrow = FALSE)
+  se_indirect <- matrix(se_indirect_vec, nrow = D, ncol = p, byrow = FALSE)
+  se_total <- matrix(se_total_vec, nrow = D, ncol = p, byrow = FALSE)
+
+  dimnames(se_direct) <- list(component = comp_names, covariate = cov_names)
+  dimnames(se_indirect) <- list(component = comp_names, covariate = cov_names)
+  dimnames(se_total) <- list(component = comp_names, covariate = cov_names)
+
+  se.amedir <- t(se_direct)
+  se.ameindir <- t(se_indirect)
+  se.ametotal <- t(se_total)
+
+ }
+
+  list( me.dir = direct_array, me.indir = indirect_array, me.total = total_array,
+        ame.dir = t(ame_direct), ame.indir = t(ame_indirect), ame.total = t(ame_total),
+        se.amedir = se.amedir, se.ameindir = se.ameindir, se.ametotal = se.ametotal  )
+}
+
+
+
+
