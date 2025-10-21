@@ -1,15 +1,15 @@
-\name{Leave-one-out cross-validation for the GWalphaR model}
-\alias{cv.gwar}
+\name{Leave-one-out cross-validation for the alpha-SLX model}
+\alias{cv.alfaslx}
 \title{
-Leave-one-out cross-validation for the GW\eqn{\alpha}R model
+Leave-one-out cross-validation for the \eqn{\alpha}-SLX model
 }
 
 \description{
-Leave-one-out cross-validation for the GW\eqn{\alpha}R model
+Leave-one-out cross-validation for the \eqn{\alpha}-SLX model
 }
 
 \usage{
-cv.gwar(y, x, a = c(0.1, 0.25, 0.5, 0.75, 1), coords, h,
+cv.alfaslx(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15,
 nfolds = 10, size = 1000, folds = NULL)
 }
 
@@ -26,20 +26,19 @@ The value of the power transformation, it has to be between -1 and 1. If zero va
 \item{coords}{
 A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
 }
-\item{h}{
-A vector with bandwith values.
+\item{k}{
+A vector with the nearest neighbours to consider for the contiguity matrix.
 }
 \item{nfolds}{
 The number of folds to split the data.
 }
 \item{size}{
-A numeric value of the specified range by which blocks are created and training/testing data are separated. This distance should be in metres. If you have big regions you should consider increasing this number. For more information see the package \emph{blockCV}.
+A numeric value of the specified range by which blocks are created and training/testing data are separated. This distance should be in metres. For more information see the package \emph{blockCV}.
 }
 \item{folds}{
 If you have the list with the folds supply it here. You can also leave it NULL and it will create folds.
 }
 }
-
 \details{
 The \eqn{\alpha}-transformation is applied to the compositional data and the numerical optimisation is performed for the regression, unless \eqn{\alpha=0}, where the coefficients are available in closed form.
 }
@@ -50,10 +49,10 @@ A list including:
 The runtime required by the cross-validation.
 }
 \item{perf}{
-A matrix with the Kullback-Leibler divergence of the observed from the fitted values. Each row corresponds to a value of \eqn{\alpha} and each column to a value of h.
+A vector with the Kullback-Leibler divergence of the observed from the fitted values. Every value corresponds to a value of \eqn{\alpha}.
 }
 \item{opt}{
-A vector with the minimum Kullback-Leibler divergance, the optimal value of \eqn{\alpha} and h.
+A vector with the minimum Kullback-Leibler divergence, the optimal value of \eqn{\alpha} and k.
 }
 }
 
@@ -81,15 +80,15 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 %}
 
 \seealso{
-\code{\link{gwar}, \link{me.gwar} \link{cv.alfaslx}
+\code{\link{alfa.slx}, \link{cv.gwar} \link{cv.alfareg}
 }
 }
 
 \examples{
 data(fadn)
-coords <- fadn[, 1:2]
-y <- fadn[, 3:7]
-x <- fadn[, 8]
-mod <- gwar(y, x, a = 1, coords, h = 0.001)
+coords <- fadn[1:100, 1:2]
+y <- fadn[1:100, 3:7]
+x <- fadn[1:100, 8]
+mod <- cv.alfaslx(y, x, a = 0.5, coords, k = 2)
 }
 

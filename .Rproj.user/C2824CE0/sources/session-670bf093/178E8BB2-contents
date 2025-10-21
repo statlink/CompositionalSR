@@ -7,7 +7,7 @@ cv.alfaslx <- function(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15, nfolds
   x <- as.matrix(x)
 
     apa <- proc.time()
-    if ( is.null(folds) )  folds <- CompositionalSR::spat.folds(coords, nfolds = nfolds, size = size)
+    if ( is.null(folds) )  folds <- CompositionalSR::spat.folds(coords, size = size, nfolds = nfolds)
 
     nfolds <- length(folds)
     kul <- matrix(nrow = nfolds, ncol = lk)

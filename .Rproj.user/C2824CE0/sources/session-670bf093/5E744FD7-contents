@@ -20,7 +20,7 @@ A matrix with the coordinates of the locations. The first column is the latitude
 The number of spatial folds to create.
 }
 \item{size}{
-A numeric value of the specified range by which blocks are created and training/testing data are separated. This distance should be in metres. If you have big regions you should consider increasing this number. For more information see the package \emph{blockCV}.
+A numeric value of the specified range by which blocks are created and training/testing data are separated. This distance should be in metres. For more information see the package \emph{blockCV}.
 }
 }
 
