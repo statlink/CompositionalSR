@@ -23,8 +23,9 @@ alfa.slx2 <- function(y, x, a, coords, k = 2:15, xnew, coordsnew, yb = NULL) {
   cords <- pi * coords / 180  ## from degrees to rads
   a1 <- sin(cords[, 1])
   coord <- cbind( cos(cords[, 1]), a1 * cos(cords[, 2]), a1 * sin(cords[, 2]) )
-  W <- 1 / Rfast::Dist(coord, square = TRUE)
+  W <- Rfast::Dist(coord, square = TRUE)
   B <- Rfast::rowOrder(W)
+  W <- 1/W
 
   cordsnew <- pi * coordsnew / 180  ## from degrees to rads
   a1 <- sin(cordsnew[, 1])
@@ -33,19 +34,20 @@ alfa.slx2 <- function(y, x, a, coords, k = 2:15, xnew, coordsnew, yb = NULL) {
   a1 <- sin(cords[, 1])
   coord <- cbind( cos(cords[, 1]), a1 * cos(cords[, 2]), a1 * sin(cords[, 2]) )
   Wnew <- Rfast::dista(coordnew, coord, square = TRUE)
-  B <- Rfast::rowOrder(Wnew)
+  Bnew <- Rfast::rowOrder(Wnew)
   Wnew <- 1 / Wnew
   Wnew[ is.infinite(Wnew) ] <- 0
+
   xnew <- model.matrix(~., data.frame(xnew) )
 
-  for ( i in 1:length(k) )  {
-    b <- B  ;  w <- W
+  for ( i in k )  {
+    b <- B  
     b[b > i + 1] <- 0
     b[b > 0] <- 1
-    w <- b * w
+    w <- b * W
     b <- NULL
     diag(w) <- 0
-    w / Rfast::rowsums(w)
+    w <- w / Rfast::rowsums(w)
 
     wx <- w %*% x[, -1]
     X <- cbind(x, wx)
@@ -58,28 +60,29 @@ alfa.slx2 <- function(y, x, a, coords, k = 2:15, xnew, coordsnew, yb = NULL) {
       ini <- as.vector( solve(crossprod(X), crossprod(X, ya) ) )
       suppressWarnings({
       mod <- minpack.lm::nls.lm( par = ini, fn = reg, ya = ya, ax = aX, a = a, ha = ha, d = d, D = D,
-                                 control = minpack.lm::nls.lm.control(maxiter = 10000) )
+                                 control = minpack.lm::nls.lm.control(maxiter = 2048) )
       })
       bes <- matrix(mod$par, ncol = d)
     }  ## end if (a == 0)
 
-    b[b > k + 1] <- 0
+    b <- Bnew
+    b[b > i + 1] <- 0
     b[b > 0] <- 1
     wnew <- b * Wnew
     b <- NULL
-    wnew <- Wnew / Rfast::rowsums(wnew)
+    wnew <- wnew / Rfast::rowsums(wnew)
 
     wxnew <- wnew %*% x[, -1]
     Xnew <- cbind(xnew, wxnew)
-    yest <- cbind( 1, exp(Xnew %*% be) )
+    yest <- cbind( 1, exp(Xnew %*% bes) )
     yest <- yest/Rfast::rowsums(yest)
 
-    p <- dim(X)[2] - 1
-    if ( is.null( colnames(X) ) ) {
-      rownames(be) <- c("constant", paste("X", 1:p, sep = ""), paste("WX", 1:p, sep = "") )
-    } else  rownames(be)  <- c("constant", colnames(X)[-1], paste("W", colnames(X)[-1], sep = "") )
+    p <- dim(x)[2] - 1
+    if ( is.null( colnames(x) ) ) {
+      rownames(bes) <- c("constant", paste("X", 1:p, sep = ""), paste("WX", 1:p, sep = "") )
+    } else  rownames(bes)  <- c("constant", colnames(x)[-1], paste("W", colnames(x)[-1], sep = "") )
 
-    gama[[ i ]] <- besselI()[(p + 2) : (2 * p + 1), ]
+    gama[[ i ]] <- bes[(p + 2) : (2 * p + 1), ]
     be[[ i ]] <- bes[1:(p + 1), ]
     est[[ i ]] <- yest
   }

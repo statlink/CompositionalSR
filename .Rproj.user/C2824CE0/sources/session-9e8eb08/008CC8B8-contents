@@ -67,19 +67,19 @@ alfa.slx2 <- function(y, x, a, coords, k = 2:15, xnew, coordsnew, yb = NULL) {
     b[b > 0] <- 1
     wnew <- b * Wnew
     b <- NULL
-    wnew <- Wnew / Rfast::rowsums(wnew)
+    wnew <- wnew / Rfast::rowsums(wnew)
 
     wxnew <- wnew %*% x[, -1]
     Xnew <- cbind(xnew, wxnew)
-    yest <- cbind( 1, exp(Xnew %*% be) )
+    yest <- cbind( 1, exp(Xnew %*% bes) )
     yest <- yest/Rfast::rowsums(yest)
 
     p <- dim(X)[2] - 1
     if ( is.null( colnames(X) ) ) {
-      rownames(be) <- c("constant", paste("X", 1:p, sep = ""), paste("WX", 1:p, sep = "") )
-    } else  rownames(be)  <- c("constant", colnames(X)[-1], paste("W", colnames(X)[-1], sep = "") )
+      rownames(bes) <- c("constant", paste("X", 1:p, sep = ""), paste("WX", 1:p, sep = "") )
+    } else  rownames(bes)  <- c("constant", colnames(X)[-1], paste("W", colnames(X)[-1], sep = "") )
 
-    gama[[ i ]] <- besselI()[(p + 2) : (2 * p + 1), ]
+    gama[[ i ]] <- bes[(p + 2) : (2 * p + 1), ]
     be[[ i ]] <- bes[1:(p + 1), ]
     est[[ i ]] <- yest
   }
