@@ -1,5 +1,6 @@
 \name{The alpha-SLX model}
 \alias{alfa.slx}
+\alias{alfa.slx2}
 \title{
 The \eqn{\alpha}-SLX model
 }
@@ -10,6 +11,7 @@ The \eqn{\alpha}-SLX model.
 
 \usage{
 alfa.slx(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL)
+alfa.slx2(y, x, a, coords, k = 2:15, xnew, coordsnew, yb = NULL)
 }
 
 \arguments{
@@ -50,7 +52,7 @@ The \eqn{\alpha}-transformation is applied to the compositional data first and t
 }
 
 \value{
-A list including:
+For the alfa.slx a list including:
 \item{runtime}{
 The time required by the regression.
 }
@@ -65,7 +67,20 @@ The covariance matrix of the beta coefficients, or NULL if it is singular. If it
 \code{\link{me.aslx}}, if necessary.
 }
 \item{est}{
-The fitted values for xnew if xnew is not NULL.
+The fitted values for xnew if xnew and coordsnew are not NULL.
+}
+For the alfa.slx2 a list including:
+\item{runtime}{
+The time required by the regression.
+}
+\item{be}{
+A list with the beta coefficients.
+}
+\item{gama}{
+A list with the gamma coefficients.
+}
+\item{est}{
+A list with the fitted values for the xnew and coordsnew.
 }
 }
 
