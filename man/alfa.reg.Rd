@@ -58,7 +58,7 @@ The covariance matrix of the beta coefficients, or NULL if it is singular.
 The fitted values for xnew if xnew is not NULL.
 }
 
-For the alfa.reg2() function a list with as many sublists as the number of values of \eqn{\alpha}. Each element (sublist) of the list contains the beta coefficients and the fitted values.
+For the alfa.reg2() function a list with the time required by all regressions and the regression coefficients and the fitted values for each vaue of \eqn{\alpha}.
 }
 
 \references{

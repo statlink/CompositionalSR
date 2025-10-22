@@ -55,7 +55,9 @@ alfa.reg2 <- function(y, x, a, xnew = NULL) {
     rownames(be) <- namx
     res[[ i ]] <- list(be = be, est = est)
   }
-
+  runtime <- proc.time() - runtime
+  res$runtime <- runtime
+   
   res
 }
 

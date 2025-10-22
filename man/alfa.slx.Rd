@@ -28,7 +28,7 @@ The value of the power transformation, it has to be between -1 and 1. If zero va
 A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
 }
 \item{k}{
-The number of nearest neighbours to consider for the contiguity matrix.
+The number of nearest neighbours to consider for the contiguity matrix. For the alfa.slx2() this should be a vector. 
 }
 \item{covb}{
 If this is FALSE, the covariance matrix of the coefficients will not be returned. If however you set it
@@ -52,7 +52,7 @@ The \eqn{\alpha}-transformation is applied to the compositional data first and t
 }
 
 \value{
-For the alfa.slx a list including:
+For the alfa.slx() a list including:
 \item{runtime}{
 The time required by the regression.
 }
@@ -69,7 +69,8 @@ The covariance matrix of the beta coefficients, or NULL if it is singular. If it
 \item{est}{
 The fitted values for xnew if xnew and coordsnew are not NULL.
 }
-For the alfa.slx2 a list including:
+
+For the alfa.slx2() a list including:
 \item{runtime}{
 The time required by the regression.
 }
