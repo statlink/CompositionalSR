@@ -1,0 +1,99 @@
+\name{The alpha-SAR model}
+\alias{alfa.sar}
+\alias{alfa.sar}
+\title{
+The \eqn{\alpha}-SAR model
+}
+
+\description{
+The \eqn{\alpha}-SAR model.
+}
+
+\usage{
+alfa.sar(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
+}
+
+\arguments{
+\item{y}{
+A matrix with the compositional data.
+}
+\item{x}{
+A matrix with the continuous predictor variables or a data frame including categorical predictor variables.
+}
+\item{a}{
+The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0. If \eqn{\alpha=0} the isometric log-ratio transformation is applied and the solution exists in a closed form, since it the classical mutivariate regression.
+}
+\item{coords}{
+A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
+}
+\item{k}{
+The number of nearest neighbours to consider for the contiguity matrix. For the alfa.slx2() this should be a vector.
+}
+\item{xnew}{
+If you have new data use it, otherwise leave it NULL.
+}
+\item{coordsnew}{
+A matrix with the coordinates of the new locations. The first column is the latitude and the second is the longitude. If you do not have new data to make predictions leave this NULL.
+}
+\item{yb}{
+If you have already transformed the data using the \eqn{\alpha}-transformation with the same \eqn{\alpha} as given in the argument "a", put it here. Othewrise leave it NULL.
+}
+}
+
+\details{
+The \eqn{\alpha}-transformation is applied to the compositional data first and then the spatial autoregresive (SAR) model is applied.
+}
+
+\value{
+A list including:
+\item{runtime}{
+The time required by the regression.
+}
+\item{be}{
+The beta coefficients.
+}
+\item{rho}{
+The estimated autoregressive coefficient.
+}
+\item{est}{
+The fitted values for xnew if xnew and coordsnew are not NULL.
+}
+}
+
+\references{
+Tsagris M. (2025). The \eqn{\alpha}--regression for compositional data: a unified framework for standard, spatially-lagged, and geographically-weighted regression models.
+https://arxiv.org/pdf/2510.12663
+
+Tsagris M. (2015). Regression analysis with compositional data containing zero values.
+Chilean Journal of Statistics, 6(2): 47-57.
+https://arxiv.org/pdf/1508.01913v1.pdf
+
+Tsagris M.T., Preston S. and Wood A.T.A. (2011). A data-based power transformation for
+compositional data.
+In Proceedings of the 4th Compositional Data Analysis Workshop, Girona, Spain.
+https://arxiv.org/pdf/1106.1451.pdf
+}
+
+\author{
+Michail Tsagris.
+
+R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
+}
+
+%\note{
+%%  ~~further notes~~
+%}
+
+\seealso{
+\code{\link{cv.alfaslx}, \link{me.aslx}, \link{gwar}, \link{alfa.reg}
+}
+}
+
+\examples{
+data(fadn)
+coords <- fadn[, 1:2]
+y <- fadn[, 3:7]
+x <- fadn[, 8]
+mod <- alfa.sar(y, x, a = 0.5, coords, k = 10)
+}
+
