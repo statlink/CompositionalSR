@@ -77,8 +77,8 @@ alfa.slx2 <- function(y, x, a, coords, k = 2:15, xnew, coordsnew, yb = NULL) {
     yest <- cbind( 1, exp(Xnew %*% bes) )
     yest <- yest/Rfast::rowsums(yest)
 
-    p <- dim(x)[2] - 1
     if ( is.null( colnames(x) ) ) {
+      p <- dim(x)[2] - 1
       rownames(bes) <- c("constant", paste("X", 1:p, sep = ""), paste("WX", 1:p, sep = "") )
     } else  rownames(bes)  <- c("constant", colnames(x)[-1], paste("W", colnames(x)[-1], sep = "") )
 
