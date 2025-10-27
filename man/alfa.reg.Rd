@@ -1,6 +1,7 @@
 \name{Regression with compositional data using the alpha-transformation}
 \alias{alfa.reg}
 \alias{alfa.reg2}
+\alias{alfa.reg3}
 \title{
 Regression with compositional data using the \eqn{\alpha}-transformation
 }
@@ -12,6 +13,7 @@ Regression with compositional data using the \eqn{\alpha}-transformation.
 \usage{
 alfa.reg(y, x, a, covb = FALSE, xnew = NULL, yb = NULL)
 alfa.reg2(y, x, a, xnew = NULL)
+alfa.reg3(y, x, a = c(-1, 1), xnew = NULL)
 }
 
 \arguments{
@@ -22,7 +24,14 @@ A matrix with the compositional data.
 A matrix with the continuous predictor variables or a data frame including categorical predictor variables.
 }
 \item{a}{
-The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0. If \eqn{\alpha=0} the isometric log-ratio transformation is applied and the solution exists in a closed form, since it the classical mutivariate regression. For the alfa.reg2() this should be a vector of \eqn{\alpha} values and the function call repeatedly the alfa.reg() function. For the alfa.reg3() function it should be a vector with two values, the endpoints of the interval of \eqn{\alpha}. This function searches for the optimal vaue of \eqn{\alpha} that minimizes the sum of squares of the errors. Using the \code{\link{optimize}} function it searches for the optimal value of \eqn{\alpha}. Instead of choosing the value of \eqn{\alpha} using \code{\link{cv.alfareg}} (that uses cross-validation) one can select it this way.
+The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0. 
+If \eqn{\alpha=0} the isometric log-ratio transformation is applied and the solution exists in a closed form, since it the 
+classical mutivariate regression. For the alfa.reg2() this should be a vector of \eqn{\alpha} values and the function call 
+repeatedly the alfa.reg() function. For the alfa.reg3() function it should be a vector with two values, the endpoints of the 
+interval of \eqn{\alpha}. This function searches for the optimal vaue of \eqn{\alpha} that minimizes the Kullback-Leibler 
+between the observed and fitted compositions. Using the \code{\link{optimize}} function it searches for the optimal value of 
+\eqn{\alpha}. Instead of choosing the value of \eqn{\alpha} using \code{\link{cv.alfareg}} (that uses cross-validation) 
+one can select it this way.
 }
 \item{covb}{
 If this is FALSE, the covariance matrix of the coefficients will not be returned. If however you set it 
@@ -59,9 +68,14 @@ The fitted values for xnew if xnew is not NULL.
 }
 
 For the alfa.reg2() function a list with the time required by all regressions and the regression coefficients and the fitted values for each vaue of \eqn{\alpha}.
+
+For the alfa.reg3() function a list with the previous elements plus an output "alfa", the optimal value of \eqn{\alpha}.
 }
 
 \references{
+Tsagris M. (2025). The \eqn{\alpha}--regression for compositional data: a unified framework for standard, spatially-lagged, and geographically-weighted regression models.
+https://arxiv.org/pdf/2510.12663
+
 Tsagris M. (2015). Regression analysis with compositional data containing zero values.
 Chilean Journal of Statistics, 6(2): 47-57.
 https://arxiv.org/pdf/1508.01913v1.pdf
