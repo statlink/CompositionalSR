@@ -80,6 +80,8 @@ alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
 
   est <- NULL
   if ( !is.null(xnew) ) {
+    xnew <- model.matrix(~., data.frame(xnew) )
+
     cordsnew <- pi * coordsnew / 180  ## from degrees to rads
     a1 <- sin(cordsnew[, 1])
     coordnew <- cbind( cos(cordsnew[, 1]), a1 * cos(cordsnew[, 2]), a1 * sin(cordsnew[, 2]) )
@@ -96,7 +98,6 @@ alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
     Wnew <- b * Wnew
     b <- NULL
     Wnew <- Wnew / Rfast::rowsums(Wnew)
-    xnew <- model.matrix(~., data.frame(xnew) )
     mu <- cbind( 1, exp(xnew %*% be) )
     mu <- mu/Rfast::rowsums(mu)
     est <- ( rho * Wnew %*% y + mu ) / (1 + rho)
