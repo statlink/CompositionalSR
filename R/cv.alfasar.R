@@ -1,4 +1,4 @@
-cv.alfaslx <- function(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15, nfolds = 10, size = 1000, folds = NULL) {
+cv.alfasar <- function(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15, nfolds = 10, size = 1000, folds = NULL) {
   if ( min(y) == 0 )  a <- a[a>0]
   la <- length(a)
   lk <- length(k)
@@ -24,7 +24,7 @@ cv.alfaslx <- function(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15, nfolds
         ytest <- y[ folds[[ m ]][[ 2 ]], ]
         coordstrain <- coords[folds[[ m ]][[ 1 ]], ]
         coordstest <- coords[folds[[ m ]][[ 2 ]], , drop = FALSE]
-        mod <- CompositionalSR::alfa.slx2( ytrain, xtrain, a[i], coords = coordstrain, k = k, xnew = xtest,
+        mod <- CompositionalSR::alfa.sar2( ytrain, xtrain, a[i], coords = coordstrain, k = k, xnew = xtest,
                                            coordsnew = coordstest, yb = ytr[folds[[ m ]][[ 1 ]], ] )
         for ( j in 1:lk ) {  
           yest <- mod$est[[ k[j] ]]
@@ -43,6 +43,3 @@ cv.alfaslx <- function(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15, nfolds
 
   list(runtime = apa, perf = kula, opt = opt)
 }
-
-
-

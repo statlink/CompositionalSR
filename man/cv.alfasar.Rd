@@ -1,15 +1,15 @@
-\name{Spatial K-fold cross-validation for the alpha-SLX model}
-\alias{cv.alfaslx}
+\name{Spatial K-fold cross-validation for the alpha-SAR model}
+\alias{cv.alfasar}
 \title{
-Spatial K-fold cross-validation for the \eqn{\alpha}-SLX model
+Spatial K-fold cross-validation for the \eqn{\alpha}-SAR model
 }
 
 \description{
-Spatial K-fold cross-validation for the \eqn{\alpha}-SLX model
+Spatial K-fold cross-validation for the \eqn{\alpha}-SAR model
 }
 
 \usage{
-cv.alfaslx(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15,
+cv.alfasar(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15,
 nfolds = 10, size = 1000, folds = NULL)
 }
 
@@ -80,7 +80,7 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 %}
 
 \seealso{
-\code{\link{alfa.slx}, \link{cv.gwar} \link{cv.alfareg}
+\code{\link{alfa.sar}, \link{cv.gwar} \link{cv.alfaslx}
 }
 }
 
@@ -89,6 +89,6 @@ data(fadn)
 coords <- fadn[1:80, 1:2]
 y <- fadn[1:80, 3:7]
 x <- fadn[1:80, 8]
-mod <- cv.alfaslx(y, x, a = 0.5, coords, k = 2)
+mod <- cv.alfasar(y, x, a = 0.5, coords, k = 2)
 }
 

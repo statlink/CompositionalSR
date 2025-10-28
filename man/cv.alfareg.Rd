@@ -1,11 +1,11 @@
-\name{Tuning the value of alpha in the alpha-regression}
+\name{K-fold cross-validtion for the alpha-regression}
 \alias{cv.alfareg}
 \title{
-Tuning the value of \eqn{\alpha} in the \eqn{\alpha}-regression
+K-fold cross-validtion the \eqn{\alpha}-regression
 }
 
 \description{
-Tuning the value of \eqn{\alpha} in the \eqn{\alpha}-regression.
+K-fold cross-validtion the \eqn{\alpha}-regression.
 }
 
 \usage{
@@ -38,7 +38,7 @@ You can specify your own seed number here or leave it NULL.
 }
 
 \details{
-Tuning the value of \eqn{\alpha} in the \eqn{\alpha}-regression takes place using k-fold cross-validation.
+Tuning the value of \eqn{\alpha} in the \eqn{\alpha}-regression takes place using K-fold cross-validation.
 }
 
 \value{

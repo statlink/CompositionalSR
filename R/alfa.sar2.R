@@ -1,4 +1,4 @@
-alfa.sar2 <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL) {
+alfa.sar2 <- function(y, x, a, coords, k = 2:15, xnew = NULL, coordsnew, yb = NULL) {
 
   reg <- function(para, ystar, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
