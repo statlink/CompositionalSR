@@ -80,11 +80,26 @@ alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
 
   est <- NULL
   if ( !is.null(xnew) ) {
-    Wnew <- CompositionalSR::contiguity(coordsnew, k)
+    cordsnew <- pi * coordsnew / 180  ## from degrees to rads
+    a1 <- sin(cordsnew[, 1])
+    coordnew <- cbind( cos(cordsnew[, 1]), a1 * cos(cordsnew[, 2]), a1 * sin(cordsnew[, 2]) )
+    cords <- pi * coords / 180  ## from degrees to rads
+    a1 <- sin(cords[, 1])
+    coord <- cbind( cos(cords[, 1]), a1 * cos(cords[, 2]), a1 * sin(cords[, 2]) )
+    Wnew <- Rfast::dista(coordnew, coord, square = TRUE)
+
+    b <- Rfast::rowOrder(Wnew)
+    b[b > k + 1] <- 0
+    b[b > 0] <- 1
+    Wnew <- 1 / Wnew
+    Wnew[ is.infinite(Wnew) ] <- 0
+    Wnew <- b * Wnew
+    b <- NULL
+    Wnew <- Wnew / Rfast::rowsums(Wnew)
     xnew <- model.matrix(~., data.frame(xnew) )
-    est <- cbind( 1, exp(xnew %*% be) )
-    est <- est/Rfast::rowsums(est)
-    est <- (1 - rho) * solve(diag(n) - rho * Wnew, est)
+    mu <- cbind( 1, exp(xnew %*% be) )
+    mu <- mu/Rfast::rowsums(mu)
+    est <- ( rho * Wnew %*% y + mu ) / (1 + rho)
   }
 
   if ( is.null( colnames(x) ) ) {
