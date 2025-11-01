@@ -38,7 +38,7 @@ alfa.sar2 <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL
   In <- diag(n)
 
   if ( a <= 1e-5 ) {
-    mod <- Compositional::comp.reg(y, X[, -1], yb = yb)
+    mod <- Compositional::comp.reg(y, x[, -1], yb = yb)
     be <- mod$be
 
   } else {

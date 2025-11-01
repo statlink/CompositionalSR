@@ -1,6 +1,5 @@
 \name{The alpha-SAR model}
 \alias{alfa.sar}
-\alias{alfa.sar2}
 \title{
 The \eqn{\alpha}-SAR model
 }
@@ -11,7 +10,6 @@ The \eqn{\alpha}-SAR model.
 
 \usage{
 alfa.sar(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
-alfa.sar2(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
 }
 
 \arguments{
@@ -42,7 +40,8 @@ If you have already transformed the data using the \eqn{\alpha}-transformation w
 }
 
 \details{
-The \eqn{\alpha}-transformation is applied to the compositional data first and the spatial autocorrelation (SAR) model is applied. The difference between the two is with regards to the estimation. The first function iterates between the golden ratio for the optimal \eqn{\rho}, given some initial values for the \eqn{\beta_s}, and the Levenberg-Marquardt algorithm to estimate the \eqn{\beta_s}, given a value of \eqn{\rho}. The second function performs a grid search searching for the range of good values of \eqn{\rho} and then uses that as starting value. The first option is faster, but this way, the covariance matrix cannot be estimated correctly. I suggest to the firstoption, you can test it obviously, because it is faster and I think it gives better results.
+The \eqn{\alpha}-transformation is applied to the compositional data first and the spatial autocorrelation (SAR) model is applied. The function performs a grid search searching for the range 
+of good values of \eqn{\rho} and then uses that as starting value. 
 }
 
 \value{
@@ -95,9 +94,9 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 
 \examples{
 data(fadn)
-coords <- fadn[, 1:2]
-y <- fadn[, 3:7]
-x <- fadn[, 8]
+coords <- fadn[1:50, 1:2]
+y <- fadn[1:50, 3:7]
+x <- fadn[1:50, 8]
 mod <- alfa.sar(y, x, a = 0.5, coords, k = 10)
 }
 

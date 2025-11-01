@@ -7,7 +7,7 @@ Authors@R: person("Michail", "Tsagris", role = c("aut", "cre"), email = "mtsagri
 Author: Michail Tsagris [aut, cre]
 Maintainer: Michail Tsagris <mtsagris@uoc.gr>
 Depends: R (>= 4.0)
-Imports: blockCV, Compositional, doParallel, foreach, minpack.lm, parallel, quantreg, Rfast, sf, stats
+Imports: blockCV, Compositional, doParallel, foreach, minpack.lm, parallel, Rfast, sf, stats
 Suggests: Rfast2
 Description: Spatial regression models with compositional responses using the alpha--transformation. Relevant papers include: Tsagris M. (2025), <doi:10.48550/arXiv.2510.12663>, Tsagris M. (2015), <https://soche.cl/chjs/volumes/06/02/Tsagris(2015).pdf>, Tsagris M.T., Preston S. and Wood A.T.A. (2011), <doi:10.48550/arXiv.1106.1451>. 
 License: GPL (>= 2)

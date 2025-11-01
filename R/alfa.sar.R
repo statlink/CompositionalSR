@@ -1,16 +1,8 @@
-alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL) {
+alfa.sar2 <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL) {
 
-  rega <- function(para, sw, ya, ax, a, ha, d, D) {
-    be <- matrix(para, ncol = d)
-    zz <- cbind( 1, exp( sw %*% ax %*% be) )
-    ta <- rowSums(zz)
-    za <- zz / ta
-    ma <- ( D / a * za - 1/a ) %*% ha
-    as.vector(ya - ma)
-  }
-
-  regarho <- function(rho, para, ya, W, ax, a, ha, d, D) {
-    be <- matrix(para, ncol = d)
+  rega <- function(para, ya, W, ax, a, In, ha, d, D) {
+    rho <- para[1]
+    be <- matrix(para[-1], ncol = d)
     if ( abs(rho) > 1e-4 ) {
       sw <- In - rho * W
       zz <- cbind( 1, exp( solve(sw, ax %*% be) ) )
@@ -18,7 +10,16 @@ alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
     ta <- rowSums(zz)
     za <- zz / ta
     ma <- ( D / a * za - 1/a ) %*% ha
-    sum( (ya - ma)^2 )
+    as.vector(ya - ma)
+  }
+
+  regarho <- function(para, sw, ya, W, ax, a, ha, d, D) {
+    be <- matrix(para, ncol = d)
+    zz <- cbind( 1, exp( sw %*% (ax %*% be) ) )
+    ta <- rowSums(zz)
+    za <- zz / ta
+    ma <- ( D / a * za - 1/a ) %*% ha
+    as.vector(ya - ma)
   }
 
   runtime <- proc.time()
@@ -37,54 +38,55 @@ alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
   In <- diag(n)
 
   if ( a <= 1e-5 ) {
-    mod <- Compositional::comp.reg(y, X[, -1], yb = yb)
+    mod <- Compositional::comp.reg(y, x[, -1], yb = yb)
     be <- mod$be
 
   } else {
     ha <- t( Compositional::helm(D) )
+    p <- dim(x)[2]
     ini <- as.vector( CompositionalSR::alfa.reg(y, x[, -1], a, yb = ya)$be )
+    r <- seq(-0.9, 0.9, by = 0.2)
+    bes <- matrix(nrow = length(r), ncol = d * p)
+    dev <- numeric( length(r) )
     suppressWarnings({
-      mod1 <- optimize( regarho, c(-1, 1), para = ini, ya = ya, W = W, ax = ax, a = a, ha = ha, d = d, D = D,
-                        tol = 1e-4 )
-      rho <- mod1$minimum
-      if ( abs(rho) > 1e-4 ) {
-        sw <- solve( In - rho * W )
-      } else  sw <- In
-      mod2 <- minpack.lm::nls.lm( par = ini, fn = rega, sw = sw, ya = ya, ax = ax, a = a, ha = ha, d = d, D = D,
-                                  control = minpack.lm::nls.lm.control(maxiter = 10000) )
-      i <- 1
-      while (mod1$objective - mod2$deviance > 1e-4) {
-        i <- i + 1
-        mod1 <- optimize( regarho, c(-1, 1), para = mod2$par, ya = ya, W = W, ax = ax, a = a, ha = ha, d = d, D = D,
-                          tol = 1e-4 )
-        rho <- mod1$minimum
-        if ( abs(rho) > 1e-4 ) {
-          sw <- solve( In - rho * W )
-        } else  sw <- In
-        mod2 <- minpack.lm::nls.lm( par = mod2$par, fn = rega, sw = sw, ya = ya, ax = ax, a = a, ha = ha, d = d, D = D,
-                                    control = minpack.lm::nls.lm.control(maxiter = 10000) )
+      for ( j in 1:length(r) ) {
+        ## sw <- spatialreg::invIrW(x = W, rho = r[j], method = "solve", feasible = NULL)
+        sw <- solve( In - r[j] * W )
+        mod1 <- minpack.lm::nls.lm( par = ini, fn = regarho, ya = ya, sw = sw, ax = ax, a = a, ha = ha, d = d, D = D,
+                                    control = minpack.lm::nls.lm.control(maxiter = 10000)  )
+        bes[j, ] <- mod1$par
+        dev[j] <- mod1$deviance
       }
-
+    })
+    ind <- which.min(dev)
+    suppressWarnings({
+      if ( r[ind] > 0 ) {
+        bou <- c( 0, min(1, 1.5 * r[ind]) )
+      } else bou <- c( max(-1, 1.5 * r[ind]), 0 )
+      mod <- minpack.lm::nls.lm( par = c(r[ind], bes[ind, ] ), fn = rega, ya = ya, W = W, ax = ax, a = a, In = In, ha = ha, d = d, D = D,
+                                 control = minpack.lm::nls.lm.control(maxiter = 10000), lower = c(bou[1], rep(-Inf, p * d) ),
+                                 upper = c(bou[2], rep(Inf, p * d) ) )
     })
 
-    rho <- mod1$minimum
-    be <- matrix(mod2$par, ncol = d)
+    rho <- mod$par[1]
+    be <- matrix(mod$par[-1], ncol = d)
   }  ## end if (a == 0)
 
   est <- NULL
   if ( !is.null(xnew) ) {
     xnew <- model.matrix(~., data.frame(xnew) )
     Xaug <- rbind(x, xnew)
+    Inm <- diag( dim(Xaug)[1] )
     coordsaug <- rbind(coords, coordsnew)
     Waug <- contiguity(coordsaug, k = 10)
-    sw <- In - rho * Waug
-    zz <- cbind( 1, exp( solve(sw, Xaug %*% be) ) )
+    ## sw <- spatialreg::invIrW(x = Waug, rho = rho, method = "solve", feasible = NULL)
+    zz <- cbind( 1, exp( solve(Inm - rho * Waug, Xaug %*% be) ) )
     ta <- rowSums(zz)
     est <- zz / ta
     est <- round(est[-c(1:n), ], 10)
   } else {
-    sw <- In - rho * W
-    zz <- cbind( 1, exp( solve(sw, x %*% be) ) )
+    ## sw <- spatialreg::invIrW(x = W, rho = rho, method = "solve", feasible = NULL)
+    zz <- cbind( 1, exp( solve(In - rho * W, x %*% be) ) )
     ta <- rowSums(zz)
     est <- zz / ta
     est <- round(est, 9)
@@ -97,5 +99,5 @@ alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
     rownames(be) <- c("constant", paste("X", 1:p, sep = "") )
   } else rownames(be)  <- c("constant", colnames(x)[-1] )
 
-  list(runtime = runtime, rho = rho, be = be, dev = mod2$deviance, est = est)
+  list(runtime = runtime, rho = rho, be = be, dev = mod$deviance, est = est)
 }
