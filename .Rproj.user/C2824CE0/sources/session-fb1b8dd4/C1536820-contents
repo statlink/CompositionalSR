@@ -1,0 +1,130 @@
+\name{The alpha-SLX model}
+\alias{alfa.slx}
+\alias{alfa.slx2}
+\title{
+The \eqn{\alpha}-SLX model
+}
+
+\description{
+The \eqn{\alpha}-SLX model.
+}
+
+\usage{
+alfa.slx(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL)
+alfa.slx2(y, x, a, coords, k = 2:15, xnew = NULL, coordsnew, yb = NULL)
+}
+
+\arguments{
+\item{y}{
+A matrix with the compositional data.
+}
+\item{x}{
+A matrix with the continuous predictor variables or a data frame including categorical predictor variables.
+}
+\item{a}{
+The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0. If \eqn{\alpha=0} the isometric log-ratio transformation is applied and the solution exists in a closed form, since it the classical mutivariate regression.
+}
+\item{coords}{
+A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
+}
+\item{k}{
+The number of nearest neighbours to consider for the contiguity matrix. For the alfa.slx2() this should be a vector.
+}
+\item{covb}{
+If this is FALSE, the covariance matrix of the coefficients will not be returned. If however you set it
+equal to TRUE and the covariance matrix is not returned it means it was singular.
+}
+\item{xnew}{
+If you have new data use it, otherwise leave it NULL.
+}
+\item{coordsnew}{
+A matrix with the coordinates of the new locations. The first column is the latitude and the second is the longitude. If you do not have new data to make predictions leave this NULL.
+}
+\item{yb}{
+If you have already transformed the data using the \eqn{\alpha}-transformation with the same \eqn{\alpha} as given in the argument "a", put it here. Othewrise leave it NULL.
+
+This is intended to be used in the function \code{\link{cv.alfareg}} in order to speed up the process. The time difference in that function is small for small samples. But, if you have a few thousands and or a few more components, there will be bigger differences.
+}
+}
+
+\details{
+The \eqn{\alpha}-transformation is applied to the compositional data first and then the spatially lagged X (SLX) model is applied.
+}
+
+\value{
+For the alfa.slx() a list including:
+\item{runtime}{
+The time required by the regression.
+}
+\item{be}{
+The beta coefficients.
+}
+\item{gama}{
+The gamma coefficients.
+}
+\item{dev}{
+The sum of the squared residuals, as produced by the function \bold{minpack.lm::nls.lm()}.
+}
+\item{covb}{
+The covariance matrix of the beta coefficients, or NULL if it is singular. If it is returned, the upper left block is the covariance matrix of the beta coefficients and the lower right block is the covariance matrix of the gama coefficients. It is in this way so as to pass it on to the marginal effects function
+\code{\link{me.aslx}}, if necessary.
+}
+\item{est}{
+The fitted values for xnew if xnew and coordsnew are not NULL.
+}
+
+For the alfa.slx2() a list including:
+\item{runtime}{
+The time required by the regression.
+}
+\item{be}{
+A list with the beta coefficients for each value of k.
+}
+\item{gama}{
+A list with the gamma coefficients.
+}
+\item{dev}{
+A vector with the sum of the squared residuals, as produced by the function \bold{minpack.lm::nls.lm()}. The positions of the vector are the ones defined by the argument k that is a vector.
+}
+\item{est}{
+A list with the fitted values for the xnew and coordsnew, for each value of k.
+}
+}
+
+\references{
+Tsagris M. (2025). The \eqn{\alpha}--regression for compositional data: a unified framework for standard, spatially-lagged, and geographically-weighted regression models.
+https://arxiv.org/pdf/2510.12663
+
+Tsagris M. (2015). Regression analysis with compositional data containing zero values.
+Chilean Journal of Statistics, 6(2): 47-57.
+https://arxiv.org/pdf/1508.01913v1.pdf
+
+Tsagris M.T., Preston S. and Wood A.T.A. (2011). A data-based power transformation for
+compositional data.
+In Proceedings of the 4th Compositional Data Analysis Workshop, Girona, Spain.
+https://arxiv.org/pdf/1106.1451.pdf
+}
+
+\author{
+Michail Tsagris.
+
+R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
+}
+
+%\note{
+%%  ~~further notes~~
+%}
+
+\seealso{
+\code{\link{cv.alfaslx}, \link{me.aslx}, \link{gwar}, \link{alfa.reg}
+}
+}
+
+\examples{
+data(fadn)
+coords <- fadn[, 1:2]
+y <- fadn[, 3:7]
+x <- fadn[, 8]
+mod <- alfa.slx(y, x, a = 0.5, coords, k = 10)
+}
+
