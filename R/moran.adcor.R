@@ -10,7 +10,7 @@ moran.adcor <- function(y, a, W, R = 999) {
       ya <- Compositional::alfa(y, a[i])$aff
       res[i] <- estats::dcov.test(ya, W %*% ya, R = R)[2]
     }
-    names(res) <- paste(alpha=, a, sep = "")
+    names(res) <- paste("alpha=", a, sep = "")
   }
   res
 }
