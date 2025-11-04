@@ -104,7 +104,7 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 %}
 
 \seealso{
-\code{\link{cv.alfareg}, \link{alfareg.nr}, \link{alfa.slx}
+\code{\link{cv.alfareg}, \link{alfa.slx}
 }
 }
 
