@@ -1,26 +1,26 @@
-\name{Marginal effects for the alpha-SLX model}
+\name{Marginal effects for the alpha-SAR model}
 \alias{me.aslx}
 \title{
-Marginal effects for the \eqn{\alpha}-SLX model
+Marginal effects for the \eqn{\alpha}-SAR model
 }
 
 \description{
-Marginal effects for the \eqn{\alpha}-SLX model.
+Marginal effects for the \eqn{\alpha}-SAR model.
 }
 
 \usage{
-me.aslx(be, gama, mu, x, coords, k = 10, cov_theta = NULL)
+me.asar(be, rho, mu, x, coords, k, cov_theta = NULL) 
 }
 
 \arguments{
 \item{be}{
-A matrix with the beta coefficients of the \eqn{\alpha}-SLX model.
+A matrix with the beta coefficients of the \eqn{\alpha}-SAR model.
 }
-\item{gama}{
-A matrix with the gamma coefficients of the \eqn{\alpha}-SLX model.
+\item{rho}{
+The spatial auto-regressive coefficient \eqn{\rho} of the \eqn{\alpha}-SAR model.
 }
 \item{mu}{
-The fitted values of the \eqn{\alpha}-SLX model.
+The fitted values of the \eqn{\alpha}-SAR model.
 }
 \item{x}{
 A matrix with the continuous predictor variables or a data frame. Categorical predictor variables are not suited here.
@@ -37,7 +37,7 @@ The covariance matrix of the beta and gamma regression coefficients. If you pass
 }
 
 \details{
-The marginal effects of the \eqn{\alpha}-SLX model are computed.
+The marginal effects of the \eqn{\alpha}-SAR model are computed.
 }
 
 \value{
@@ -96,7 +96,7 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 %}
 
 \seealso{
-\code{\link{me.gwar}, \link{me.ar}, \link{alfa.slx}
+\code{\link{me.ar}, \link{me.aslx}, \link{me.gwar}
 }
 }
 
@@ -105,7 +105,7 @@ data(fadn)
 coords <- fadn[, 1:2]
 y <- fadn[, 3:7]
 x <- fadn[, 8]
-mod <- alfa.slx(y, x, a = 0.5, coords, k = 10, xnew = x, coordsnew = coords)
-me <- me.aslx(mod$be, mod$gama, mod$est, x, coords, k = 10)
+mod <- alfa.sar(y, x, a = 0.75, coords, k = 6)
+me <- me.asar(mod$be, mod$rho, mod$est, x, coords, k = 6) 
 }
 

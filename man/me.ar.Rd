@@ -28,7 +28,7 @@ The covariance matrix of the beta regression coefficients. If you pass this argu
 }
 
 \details{
-The \eqn{\alpha}-transformation is applied to the compositional data first and then the \eqn{\alpha}-regression model is applied.
+The marginal effects of the \eqn{\alpha}-regression model are computed.
 }
 
 \value{
