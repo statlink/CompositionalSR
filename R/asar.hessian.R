@@ -86,13 +86,21 @@ asar.hessian <- function(y, x, a, rho, be, coords, k, verbose = TRUE) {
   }
   
   if (verbose) cat("\nDone!  \n")
-  Hessian
-
+  
   n <- p <- dim(Hessian)[1]
   # Create new order: p first, then all others in original order
   row_order <- c(p, (1:n)[-p])
   col_order <- c(p, (1:n)[-p])
-  Hessian[row_order, col_order]
+  Hessian <- Hessian[row_order, col_order]
+  a2 <- colnames(x)
+  if ( is.null(a2) ) {
+    p <- dim(x)[2] - 1
+    a2 <- c("constant", paste("X", 1:p, sep = "") )
+  } else a2[1] <- "constant"
+  a1 <- paste("Y", 2:D, sep = "")
+  nam <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
+  colnames(Hessian) <- rownames(Hessian) <- c("rho", nam)  
+  Hessian
 }
 
 

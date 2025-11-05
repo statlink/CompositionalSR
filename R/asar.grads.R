@@ -54,7 +54,7 @@ asar.grads <- function(y, x, a, rho, be, coords, k) {
   if ( is.null(a2) ) {
     p <- dim(x)[2] - 1
     a2 <- c("constant", paste("X", 1:p, sep = "") )
-  } else a2  <- c("constant", colnames(x)[-1] )
+  } else a2[1] <- "constant"
   a1 <- paste("Y", 2:D, sep = "")
   nam <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
   colnames(grad_matrix) <- c("rho", nam)
