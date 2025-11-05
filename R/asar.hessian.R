@@ -1,0 +1,474 @@
+asar.hessian <- function(y, x, a, rho, be, coords, k, verbose = TRUE) {
+  
+  n <- dim(y)[1]  ;  D <- dim(y)[2]
+  d <- D - 1
+  x <- model.matrix( y~., data = as.data.frame(x) )
+  p <- dim(x)[2]
+  total_params <- d * p + 1
+  B <- t(be)
+  W <- CompositionalSR::contiguity(coords, k) 
+
+  if (verbose) cat("Initializing...\n")
+    
+  # Compute S(rho)^{-1}
+  I_n <- diag(n)
+  S_inv <- solve(I_n - rho * W)
+  x_tilde <- S_inv %*% x
+  
+  # Compute fitted compositions
+  zz <- cbind( 1, exp(x_tilde %*% be) )
+  ta <- Rfast::rowsums(zz)
+  mu <- zz / ta
+  # Apply alpha-transformation
+  ya <- Compositional::alfa(y, a)$aff
+  mu_a <- Compositional::alfa(mu, a)$aff
+  R_a <- ya - mu_a
+  # Helmert sub-matrix
+  H <- helm(D)
+  # Compute derivatives needed for rho
+  com <- S_inv %*% W
+  dX_tilde_drho <- com %*% x_tilde
+  d2X_tilde_drho2 <- 2 * com %*% com %*% x_tilde
+  # Initialize full Hessian matrix (accumulate directly)
+  Hessian <- matrix(0, nrow = total_params, ncol = total_params)
+  
+ if (verbose) cat("Computing Hessian contributions...\n")
+  
+  # Progress bar setup
+  pb_interval <- max(1, floor(n / 20))
+  # --- Accumulate Hessian from each observation ---
+  for (i in 1:n) {
+    
+    if ( verbose && i %% pb_interval == 0 ) {
+      cat( sprintf("  Progress: %d/%d (%.1f%%)\r", i, n, 100*i/n) )
+      flush.console()
+    }
+    
+    # Get observation-specific values
+    mu_i <- mu[i,]
+    x_tilde_i <- x_tilde[i,]
+    dx_tilde_drho_i <- dX_tilde_drho[i,]
+    d2x_tilde_drho2_i <- d2X_tilde_drho2[i,]
+    R_a_i <- R_a[i,]
+    T_i <- sum(mu_i^a)
+    # --- Block 1: H_beta_beta (accumulate contributions) ---
+    for ( k1 in 1:d ) {
+      for ( s1 in 1:p ) {
+        param_idx1 <- (k1 - 1) * p + s1
+        for ( k2 in k1:d ) {  # Only upper triangle (use symmetry)
+          s2_start <- ifelse(k2 == k1, s1, 1)  # Avoid redundant computation  
+          for ( s2 in s2_start:p ) {
+            param_idx2 <- (k2 - 1) * p + s2
+            hess_val <- .compute_hess_beta_beta(mu_i, x_tilde_i, R_a_i, 
+                         H, a, T_i, k1, s1, k2, s2, d)  
+            Hessian[param_idx1, param_idx2] <- Hessian[param_idx1, param_idx2] + hess_val
+            if (param_idx1 != param_idx2) {
+              Hessian[param_idx2, param_idx1] <- Hessian[param_idx2, param_idx1] + hess_val
+            }
+          }
+        }
+      }
+    }
+    # --- Block 2: H_beta_rho (accumulate contributions) ---
+    for ( k in 1:d ) {
+      for ( s in 1:p ) {
+        param_idx <- (k - 1) * p + s
+        hess_val <- .compute_hess_beta_rho(mu_i, x_tilde_i, dx_tilde_drho_i, 
+                     R_a_i, B, H, a, T_i, k, s, d)
+        Hessian[param_idx, total_params] <- Hessian[param_idx, total_params] + hess_val
+        Hessian[total_params, param_idx] <- Hessian[total_params, param_idx] + hess_val
+      }
+    }
+    # --- Block 3: H_rho_rho (accumulate contribution) ---
+    hess_val <- .compute_hess_rho_rho(mu_i, x_tilde_i, dx_tilde_drho_i, 
+                 d2x_tilde_drho2_i, R_a_i, B, H, a, T_i, d)
+    Hessian[total_params, total_params] <- Hessian[total_params, total_params] + hess_val
+  }
+  
+  if (verbose) cat("\nDone!  \n")
+  Hessian
+
+  n <- p <- dim(Hessian)[1]
+  # Create new order: p first, then all others in original order
+  row_order <- c(p, (1:n)[-p])
+  col_order <- c(p, (1:n)[-p])
+  Hessian[row_order, col_order]
+}
+
+
+# ============================================================================
+# Optimized Block Computation Functions
+# ============================================================================
+
+## Compute beta-beta block contribution for one observation
+.compute_hess_beta_beta <- function(mu_i, x_tilde_i, R_alpha_i, H, alpha, T_i,
+                                   k1, s1, k2, s2, d) {
+  
+  D <- length(mu_i)
+  hess_val <- 0
+  
+  # Loop over output components
+  for ( j in 1:d ) {
+    # First-order term (Gauss-Newton)
+    dmu_alpha_1 <- 0
+    dmu_alpha_2 <- 0
+    
+    for ( ell in 1:D ) {
+      for ( p in 1:D ) {
+        du_dmu <- .compute_du_dmu_scalar(mu_i, ell, p, alpha, T_i)
+        dmu_dbeta_1 <- compute_dmu_dbeta_scalar(mu_i, x_tilde_i, p, k1, s1)
+        dmu_alpha_1 <- dmu_alpha_1 + H[j, ell] * du_dmu * dmu_dbeta_1
+        dmu_dbeta_2 <- compute_dmu_dbeta_scalar(mu_i, x_tilde_i, p, k2, s2)
+        dmu_alpha_2 <- dmu_alpha_2 + H[j, ell] * du_dmu * dmu_dbeta_2
+      }
+    }
+    
+    dmu_alpha_1 <- (D / alpha) * dmu_alpha_1
+    dmu_alpha_2 <- (D / alpha) * dmu_alpha_2
+    hess_val <- hess_val - dmu_alpha_1 * dmu_alpha_2
+    
+    # Second-order term (exact correction)
+    d2mu_alpha <- 0
+    
+    for ( ell in 1:D ) {
+      for ( p in 1:D ) {
+        for ( q in 1:D ) {
+          # Second derivative of power transformation
+          d2u_dmu2 <- .compute_d2u_dmu2(mu_i, ell, p, q, alpha, T_i)
+          dmu_p_dbeta1 <- .compute_dmu_dbeta_scalar(mu_i, x_tilde_i, p, k1, s1)
+          dmu_q_dbeta2 <- .compute_dmu_dbeta_scalar(mu_i, x_tilde_i, q, k2, s2)
+          d2mu_alpha <- d2mu_alpha + H[j, ell] * d2u_dmu2 * dmu_p_dbeta1 * dmu_q_dbeta2
+        }
+      }
+      
+      # Term with first derivative of u and second derivative of mu
+      for ( p in 1:D ) {
+        du_dmu <- .compute_du_dmu_scalar(mu_i, ell, p, alpha, T_i)
+        d2mu_dbeta2 <- .compute_d2mu_dbeta2_scalar(mu_i, x_tilde_i, p, k1, s1, k2, s2)
+        d2mu_alpha <- d2mu_alpha + H[j, ell] * du_dmu * d2mu_dbeta2
+      }
+    }
+    
+    d2mu_alpha <- (D / alpha) * d2mu_alpha
+    hess_val <- hess_val + R_alpha_i[j] * d2mu_alpha
+  }
+  
+  return(hess_val)
+}
+
+
+## Compute beta-rho block contribution for one observation
+.compute_hess_beta_rho <- function(mu_i, x_tilde_i, dx_tilde_drho_i, R_alpha_i,
+                                  B, H, alpha, T_i, k, s, d) {
+  
+  D <- length(mu_i)
+  hess_val <- 0
+  
+  for ( j in 1:d ) {
+    # First-order term
+    dmu_alpha_beta <- 0
+    dmu_alpha_rho <- 0
+    
+    for ( ell in 1:D ) {
+      for ( p in 1:D ) {
+        du_dmu <- .compute_du_dmu_scalar(mu_i, ell, p, alpha, T_i)
+        dmu_dbeta <- .compute_dmu_dbeta_scalar(mu_i, x_tilde_i, p, k, s)
+        dmu_alpha_beta <- dmu_alpha_beta + H[j, ell] * du_dmu * dmu_dbeta
+        dmu_drho <- .compute_dmu_drho_scalar(mu_i, dx_tilde_drho_i, B, p, d)
+        dmu_alpha_rho <- dmu_alpha_rho + H[j, ell] * du_dmu * dmu_drho
+      }
+    }
+    
+    dmu_alpha_beta <- (D / alpha) * dmu_alpha_beta
+    dmu_alpha_rho <- (D / alpha) * dmu_alpha_rho
+    hess_val <- hess_val - dmu_alpha_beta * dmu_alpha_rho
+    
+    # Second-order term
+    d2mu_alpha <- 0
+    
+    for ( ell in 1:D ) {
+      for ( p in 1:D ) {
+        for ( q in 1:D ) {
+          d2u_dmu2 <- .compute_d2u_dmu2(mu_i, ell, p, q, alpha, T_i)
+          dmu_p_dbeta <- .compute_dmu_dbeta_scalar(mu_i, x_tilde_i, p, k, s)
+          dmu_q_drho <- .compute_dmu_drho_scalar(mu_i, dx_tilde_drho_i, B, q, d)
+          d2mu_alpha <- d2mu_alpha + H[j, ell] * d2u_dmu2 * dmu_p_dbeta * dmu_q_drho
+        }
+      }
+      for ( p in 1:D ) {
+        du_dmu <- .compute_du_dmu_scalar(mu_i, ell, p, alpha, T_i)
+        d2mu_dbeta_drho <- .compute_d2mu_dbeta_drho_scalar(mu_i, x_tilde_i, dx_tilde_drho_i, B, p, k, s, d)
+        d2mu_alpha <- d2mu_alpha + H[j, ell] * du_dmu * d2mu_dbeta_drho
+      }
+    }
+    
+    d2mu_alpha <- (D / alpha) * d2mu_alpha
+    hess_val <- hess_val + R_alpha_i[j] * d2mu_alpha
+  }
+  
+  hess_val
+}
+
+
+## Compute rho-rho block contribution for one observation
+.compute_hess_rho_rho <- function(mu_i, x_tilde_i, dx_tilde_drho_i, d2x_tilde_drho2_i,
+                                  R_alpha_i, B, H, alpha, T_i, d) {
+  
+  D <- length(mu_i)
+  hess_val <- 0
+  
+  for ( j in 1:d ) {
+    # First-order term
+    dmu_alpha_rho <- 0
+    
+    for ( ell in 1:D ) {
+      for ( p in 1:D ) {
+        du_dmu <- .compute_du_dmu_scalar(mu_i, ell, p, alpha, T_i)
+        dmu_drho <- .compute_dmu_drho_scalar(mu_i, dx_tilde_drho_i, B, p, d)
+        dmu_alpha_rho <- dmu_alpha_rho + H[j, ell] * du_dmu * dmu_drho
+      }
+    }
+    
+    dmu_alpha_rho <- (D / alpha) * dmu_alpha_rho
+    hess_val <- hess_val - dmu_alpha_rho^2
+    # Second-order term
+    d2mu_alpha <- 0
+    
+    for ( ell in 1:D ) {
+      for ( p in 1:D ) {
+        for ( q in 1:D ) {
+          d2u_dmu2 <- .compute_d2u_dmu2(mu_i, ell, p, q, alpha, T_i)
+          dmu_p_drho <- .compute_dmu_drho_scalar(mu_i, dx_tilde_drho_i, B, p, d)
+          dmu_q_drho <- .compute_dmu_drho_scalar(mu_i, dx_tilde_drho_i, B, q, d)
+          d2mu_alpha <- d2mu_alpha + H[j, ell] * d2u_dmu2 * dmu_p_drho * dmu_q_drho
+        }
+      }
+      
+      for ( p in 1:D ) {
+        du_dmu <- .compute_du_dmu_scalar(mu_i, ell, p, alpha, T_i)
+        d2mu_drho2 <- .compute_d2mu_drho2_scalar(mu_i, x_tilde_i, dx_tilde_drho_i, d2x_tilde_drho2_i, B, p, d)
+        d2mu_alpha <- d2mu_alpha + H[j, ell] * du_dmu * d2mu_drho2
+      }
+    }
+    
+    d2mu_alpha <- (D / alpha) * d2mu_alpha
+    hess_val <- hess_val + R_alpha_i[j] * d2mu_alpha
+  }
+  
+  hess_val
+}
+
+
+## First derivative of power transformation (scalar version)
+.compute_du_dmu_scalar <- function(mu, ell, p, alpha, T_i) {
+  if ( ell == p ) {
+    du_dmu <- (alpha * mu[p]^(alpha - 1) / T_i) * (1 - mu[ell]^alpha / T_i)
+  } else  du_dmu <- -(alpha * mu[ell]^alpha * mu[p]^(alpha - 1)) / T_i^2
+  du_dmu
+}
+
+
+## Second derivative of power transformation
+.compute_d2u_dmu2 <- function(mu, ell, p, q, alpha, T_i) {
+  
+  D <- length(mu)
+  
+  if ( ell == p && p == q ) {
+    term1 <- alpha * (alpha - 1) * mu[ell]^(alpha - 2) / T_i
+    term2 <- -2 * alpha^2 * mu[ell]^(2*alpha - 2) / T_i^2
+    term3 <- 2 * alpha^2 * mu[ell]^(3*alpha - 2) / T_i^3
+    d2u <- term1 * (1 - mu[ell]^alpha / T_i) + term2 + term3
+    
+  } else if ( ell == p && p != q ) {
+    term1 <- -alpha * (alpha - 1) * mu[ell]^(alpha - 1) * mu[q]^(alpha - 1) / T_i^2
+    term2 <- -alpha^2 * mu[ell]^alpha * mu[q]^(alpha - 1) / T_i^2
+    term3 <- 2 * alpha^2 * mu[ell]^(2*alpha - 1) * mu[q]^(alpha - 1) / T_i^3
+    d2u <- term1 * (1 - mu[ell]^alpha / T_i) + term2 + term3
+    
+  } else if ( ell == q && p != q ) {
+    term1 <- -alpha * (alpha - 1) * mu[p]^(alpha - 1) * mu[ell]^(alpha - 1) / T_i^2
+    term2 <- -alpha^2 * mu[ell]^(2*alpha - 1) * mu[p]^(alpha - 1) / T_i^2
+    term3 <- 2 * alpha^2 * mu[ell]^(3*alpha - 1) * mu[p]^(alpha - 1) / T_i^3
+    d2u <- term1 * (1 - mu[ell]^alpha / T_i) + term2 + term3
+    
+  } else if ( p == q && ell != p ) {
+    term1 <- -alpha * (alpha - 1) * mu[ell]^alpha * mu[p]^(alpha - 2) / T_i^2
+    term3 <- 2 * alpha^2 * mu[ell]^alpha * mu[p]^(2*alpha - 2) / T_i^3
+    d2u <- term1 + term3
+    
+  } else {
+    term2 <- -alpha^2 * mu[ell]^alpha * mu[p]^(alpha - 1) * mu[q]^(alpha - 1) / T_i^2
+    term3 <- 2 * alpha^2 * mu[ell]^alpha * mu[p]^(alpha - 1) * mu[q]^(alpha - 1) / T_i^3
+    d2u <- term2 + term3
+  }
+  
+  d2u
+}
+
+
+## First derivative of multinomial w.r.t. beta (scalar)
+.compute_dmu_dbeta_scalar <- function(mu_i, x_tilde_i, p, k, s) {
+  if ( p == 1 ) {
+    dmu <- -mu_i[1] * mu_i[k + 1] * x_tilde_i[s]
+  } else if ( p == k + 1 ) {
+    dmu <- mu_i[p] * (1 - mu_i[p]) * x_tilde_i[s]
+  } else {
+    dmu <- -mu_i[p] * mu_i[k + 1] * x_tilde_i[s]
+  }
+  dmu
+}
+
+
+## Second derivative of multinomial w.r.t. two betas
+.compute_d2mu_dbeta2_scalar <- function(mu_i, x_tilde_i, p, k1, s1, k2, s2) {
+  
+  D <- length(mu_i)
+  
+  if (k1 == k2) {
+    if (p == 1) {
+      d2mu <- -mu_i[1] * mu_i[k1 + 1] * (mu_i[k1 + 1] - mu_i[1]) * x_tilde_i[s1] * x_tilde_i[s2]
+    } else if (p == k1 + 1) {
+      d2mu <- mu_i[p] * (1 - mu_i[p]) * (1 - 2*mu_i[p]) * x_tilde_i[s1] * x_tilde_i[s2]
+    } else {
+      d2mu <- mu_i[p] * mu_i[k1 + 1] * (mu_i[k1 + 1] + mu_i[p]) * x_tilde_i[s1] * x_tilde_i[s2]
+    }
+  } else {
+    if (p == 1) {
+      d2mu <- mu_i[1] * mu_i[k1 + 1] * mu_i[k2 + 1] * x_tilde_i[s1] * x_tilde_i[s2]
+    } else if (p == k1 + 1) {
+      d2mu <- -mu_i[p] * mu_i[k2 + 1] * (1 - mu_i[p]) * x_tilde_i[s1] * x_tilde_i[s2]
+    } else if (p == k2 + 1) {
+      d2mu <- -mu_i[p] * mu_i[k1 + 1] * (1 - mu_i[p]) * x_tilde_i[s1] * x_tilde_i[s2]
+    } else {
+      d2mu <- mu_i[p] * mu_i[k1 + 1] * mu_i[k2 + 1] * x_tilde_i[s1] * x_tilde_i[s2]
+    }
+  }
+  
+  d2mu
+}
+
+
+## First derivative of mu w.r.t. rho (scalar)
+.compute_dmu_drho_scalar <- function(mu_i, dx_tilde_drho_i, B, p, d) {
+  
+  D <- length(mu_i)
+  if (p == 1) {
+    dmu_drho <- 0
+    for (k in 1:d)  dmu_drho <- dmu_drho - mu_i[1] * mu_i[k + 1] * sum(B[k,] * dx_tilde_drho_i)
+  } else {
+    k <- p - 1
+    dmu_drho <- mu_i[p] * sum(B[k,] * dx_tilde_drho_i)
+    for (m in 1:d)  dmu_drho <- dmu_drho - mu_i[p] * mu_i[m + 1] * sum(B[m,] * dx_tilde_drho_i)
+  }
+  
+  dmu_drho
+}
+
+
+## Mixed second derivative of mu w.r.t. beta and rho
+.compute_d2mu_dbeta_drho_scalar <- function(mu_i, x_tilde_i, dx_tilde_drho_i,
+                                            B, p, k, s, d) {
+  
+  D <- length(mu_i)
+  
+  if (p == 1) {
+    term1 <- -mu_i[1] * mu_i[k + 1] * dx_tilde_drho_i[s]
+    term2 <- 0
+    for (m in 1:d) {
+      coef <- sum(B[m,] * dx_tilde_drho_i)
+      if (m == k) {
+        term2 <- term2 + mu_i[1] * mu_i[m + 1] * (2*mu_i[1] - 1) * coef * x_tilde_i[s]
+      } else {
+        term2 <- term2 + mu_i[1] * mu_i[k + 1] * mu_i[m + 1] * coef * x_tilde_i[s]
+      }
+    }
+    d2mu <- term1 + term2
+    
+  } else if (p == k + 1) {
+    term1 <- mu_i[p] * (1 - mu_i[p]) * dx_tilde_drho_i[s]
+    term2 <- 0
+    for (m in 1:d) {
+      coef <- sum(B[m,] * dx_tilde_drho_i)
+      if (m == k) {
+        term2 <- term2 + mu_i[p] * (1 - mu_i[p]) * (1 - 2*mu_i[p]) * coef * x_tilde_i[s]
+      } else {
+        term2 <- term2 - mu_i[p] * mu_i[m + 1] * (1 - mu_i[p]) * coef * x_tilde_i[s]
+      }
+    }
+    d2mu <- term1 + term2
+    
+  } else {
+    term1 <- -mu_i[p] * mu_i[k + 1] * dx_tilde_drho_i[s]
+    term2 <- 0
+    for (m in 1:d) {
+      coef <- sum(B[m,] * dx_tilde_drho_i)
+      if (m == k) {
+        term2 <- term2 + mu_i[p] * mu_i[k + 1] * (mu_i[p] + mu_i[k + 1]) * coef * x_tilde_i[s]
+      } else if (m == p - 1) {
+        term2 <- term2 - mu_i[p] * mu_i[k + 1] * (1 - mu_i[p]) * coef * x_tilde_i[s]
+      } else {
+        term2 <- term2 + mu_i[p] * mu_i[k + 1] * mu_i[m + 1] * coef * x_tilde_i[s]
+      }
+    }
+    d2mu <- term1 + term2
+  }
+  
+  d2mu
+}
+
+
+## Second derivative of mu w.r.t. rho twice
+.compute_d2mu_drho2_scalar <- function(mu_i, x_tilde_i, dx_tilde_drho_i,
+                                       d2x_tilde_drho2_i, B, p, d) {
+  
+  D <- length(mu_i)
+  
+  if (p == 1) {
+    term1 <- 0
+    for (k in 1:d)  term1 <- term1 - mu_i[1] * mu_i[k + 1] * sum(B[k,] * d2x_tilde_drho2_i)
+    term2 <- 0
+    for (k in 1:d) {
+      for (m in 1:d) {
+        coef_k <- sum(B[k,] * dx_tilde_drho_i)
+        coef_m <- sum(B[m,] * dx_tilde_drho_i)
+        if (k == m) {
+          term2 <- term2 + mu_i[1] * mu_i[k + 1] * (2*mu_i[1] - 1) * coef_k * coef_m
+        } else  term2 <- term2 + mu_i[1] * mu_i[k + 1] * mu_i[m + 1] * coef_k * coef_m
+      }
+    }
+    
+    d2mu <- term1 + term2
+    
+  } else {
+    k <- p - 1
+    term1 <- mu_i[p] * sum(B[k,] * d2x_tilde_drho2_i)
+    for (m in 1:d)  term1 <- term1 - mu_i[p] * mu_i[m + 1] * sum(B[m,] * d2x_tilde_drho2_i)
+    term2 <- 0
+    for (m1 in 1:d) {
+      for (m2 in 1:d) {
+        coef_m1 <- sum(B[m1,] * dx_tilde_drho_i)
+        coef_m2 <- sum(B[m2,] * dx_tilde_drho_i)
+        if (m1 == k && m2 == k) {
+          term2 <- term2 + mu_i[p] * (1 - mu_i[p]) * (1 - 2*mu_i[p]) * coef_m1 * coef_m2
+        } else if (m1 == k && m2 != k) {
+          term2 <- term2 - mu_i[p] * mu_i[m2 + 1] * (1 - mu_i[p]) * coef_m1 * coef_m2
+        } else if (m1 != k && m2 == k) {
+          term2 <- term2 - mu_i[p] * mu_i[m1 + 1] * (1 - mu_i[p]) * coef_m1 * coef_m2
+        } else if (m1 == m2) {
+          term2 <- term2 + mu_i[p] * mu_i[m1 + 1] * (mu_i[p] + mu_i[m1 + 1]) * coef_m1 * coef_m2
+        } else {
+          term2 <- term2 + mu_i[p] * mu_i[m1 + 1] * mu_i[m2 + 1] * coef_m1 * coef_m2
+        }
+      }
+    }
+    
+    d2mu <- term1 + term2
+  }
+  
+  d2mu
+}
+
+  
+
+  
+

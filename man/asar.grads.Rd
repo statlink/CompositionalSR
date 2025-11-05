@@ -1,0 +1,87 @@
+\name{The gradient vector of the \eqn{\alpha}-SAR model at each observation}
+\alias{asar.grads}
+\title{
+The gradient vector of the \eqn{\alpha}-SAR model at each observation
+}
+
+\description{
+The gradient vector of the \eqn{\alpha}-SAR model at each observation.
+}
+
+\usage{
+asar.grads(y, x, a, rho, be, coords, k)
+}
+
+\arguments{
+\item{y}{
+A matrix with the compositional data.
+}
+\item{x}{
+A matrix with the continuous predictor variables or a data frame including categorical predictor variables.
+}
+\item{a}{
+The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0. 
+}
+\item{rho}{
+The spatial autocorrelation parameter \eqn{\rho}.
+}
+\item{be}{
+The regression coefficients of the \eqn{\alpha}-SAR model.
+}
+\item{coords}{
+A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
+}
+\item{k}{
+The number of nearest neighbours to consider for the contiguity matrix.
+}
+}
+
+\details{
+The gradient vector of the \eqn{\alpha}-SAR model is computed at each observation.
+}
+
+\value{
+A matrix with the gradient vector computed at each observation.
+}
+
+\references{
+Tsagris M. (2025). The \eqn{\alpha}--regression for compositional data: a unified framework for standard, spatially-lagged, spatial autoregressive and geographically-weighted regression models.
+https://arxiv.org/pdf/2510.12663
+
+Tsagris M. (2015). Regression analysis with compositional data containing zero values.
+Chilean Journal of Statistics, 6(2): 47-57.
+https://arxiv.org/pdf/1508.01913v1.pdf
+
+Tsagris M.T., Preston S. and Wood A.T.A. (2011). A data-based power transformation for
+compositional data.
+In Proceedings of the 4th Compositional Data Analysis Workshop, Girona, Spain.
+https://arxiv.org/pdf/1106.1451.pdf
+}
+
+\author{
+Michail Tsagris.
+
+R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
+}
+
+%\note{
+%%  ~~further notes~~
+%}
+
+\seealso{
+\code{\link{alfa.sar}, \link{cv.alfasar}, \link{alfa.reg}
+}
+}
+
+\examples{
+data(fadn)
+coords <- fadn[, 1:2]
+y <- fadn[, 3:7]
+x <- fadn[, 8:10]
+
+be <- matrix( c( 12.72191991, 0.04300266, -1.78301001, -3.02074120, -23.54785921, 
+0.06771573, 2.71969599, 1.89312564, 5.38640736, 0.05179626, -1.21336879, 0.40175088, 
+-1.98258721, 0.06815682, -0.64458883, 0.95470802 ), ncol = 4 )
+grads <- asar.grads(y, x, a = 1, rho = -0.1479491, be, coords, k = 5)  
+}
+

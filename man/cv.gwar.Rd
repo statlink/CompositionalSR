@@ -41,7 +41,7 @@ If you have the list with the folds supply it here. You can also leave it NULL a
 }
 
 \details{
-The \eqn{\alpha}-transformation is applied to the compositional data and the numerical optimisation is performed for the regression, unless \eqn{\alpha=0}, where the coefficients are available in closed form.
+The 10-fold spatial cross-validation protocol is applied to choose the optimal values of \eqn{\alpha} and h.
 }
 
 \value{
@@ -50,7 +50,7 @@ A list including:
 The runtime required by the cross-validation.
 }
 \item{perf}{
-A matrix with the Kullback-Leibler divergence of the observed from the fitted values. Each row corresponds to a value of \eqn{\alpha} and each column to a value of h.
+A vector with the average Kullback-Leibler divergence, for every value of \eqn{\alpha}.
 }
 \item{opt}{
 A vector with the minimum Kullback-Leibler divergance, the optimal value of \eqn{\alpha} and h.

@@ -1,16 +1,16 @@
-\name{K-fold cross-validtion for the alpha-regression}
-\alias{cv.alfareg}
+\name{Spatial K-fold cross-validation for the alpha-SAR model}
+\alias{cv.alfasar}
 \title{
-K-fold cross-validtion the \eqn{\alpha}-regression
+Spatial K-fold cross-validation for the \eqn{\alpha}-SAR model
 }
 
 \description{
-K-fold cross-validtion the \eqn{\alpha}-regression.
+Spatial K-fold cross-validation for the \eqn{\alpha}-SAR model
 }
 
 \usage{
-cv.alfareg(y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10,
-folds = NULL, nc = 1, seed = NULL)
+cv.alfasar(y, x, a = seq(0.1, 1, by = 0.1), coords, k = 2:15, 
+nfolds = 10, size = 1000, folds = NULL)
 }
 
 \arguments{
@@ -23,22 +23,24 @@ A matrix with the continuous predictor variables or a data frame including categ
 \item{a}{
 The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0. If \eqn{\alpha=0} the isometric log-ratio transformation is applied.
 }
+\item{coords}{
+A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
+}
+\item{k}{
+A vector with the nearest neighbours to consider for the contiguity matrix.
+}
 \item{nfolds}{
 The number of folds to split the data.
+}
+\item{size}{
+A numeric value of the specified range by which blocks are created and training/testing data are separated. This distance should be in metres. If you have big regions you should consider increasing this number. For more information see the package \emph{blockCV}.
 }
 \item{folds}{
 If you have the list with the folds supply it here. You can also leave it NULL and it will create folds.
 }
-\item{nc}{
-The number of cores to use. IF you have a multicore computer it is advisable to use more than 1. It makes the procedure faster. It is advisable to use it if you have many observations and or many variables, otherwise it will slow down th process.
 }
-\item{seed}{
-You can specify your own seed number here or leave it NULL.
-}
-}
-
 \details{
-Tuning the value of \eqn{\alpha} in the \eqn{\alpha}-regression takes place using K-fold cross-validation.
+The 10-fold spatial cross-validation protocol is applied to choose the optimal values of \eqn{\alpha} and k.
 }
 
 \value{
@@ -50,7 +52,7 @@ The runtime required by the cross-validation.
 A vector with the average Kullback-Leibler divergence, for every value of \eqn{\alpha}.
 }
 \item{opt}{
-A vector with the minimum Kullback-Leibler divergence and the optimal value of \eqn{\alpha}.
+A vector with the minimum Kullback-Leibler divergence, the optimal value of \eqn{\alpha} and k.
 }
 }
 
@@ -78,14 +80,15 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 %}
 
 \seealso{
-\code{ \link{alfa.reg}, \link{cv.alfaslx}, \link{cv.gwar}, \link{me.ar}
+\code{\link{alfa.slx}, \link{cv.gwar} \link{cv.alfareg}
 }
 }
 
 \examples{
 data(fadn)
-y <- fadn[, 3:7]
-x <- fadn[, 8]
-mod <- cv.alfareg(y, x, a = c(0.5, 1))
+coords <- fadn[1:60, 1:2]
+y <- fadn[1:60, 3:7]
+x <- fadn[1:60, 8]
+mod <- cv.alfaslx(y, x, a = 0.5, coords, k = 2)
 }
 
