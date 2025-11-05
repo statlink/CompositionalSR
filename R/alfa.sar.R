@@ -1,4 +1,4 @@
-alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL) {
+alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL) {
 
   rega <- function(para, ya, W, ax, a, In, ha, d, D) {
     rho <- para[1]
@@ -98,20 +98,7 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
   if ( is.null( colnames(x) ) ) {
     rownames(be) <- c("constant", paste("X", 1:p, sep = "") )
   } else rownames(be)  <- c("constant", colnames(x)[-1] )
-
-  if ( covb )  {
-    covb <- try( solve(mod$hessian), silent = TRUE )
-    if ( !identical( class(covb), "try-error" ) ) {
-      a1 <- paste("Y", 2:D, sep = "")
-      a2 <- rownames(be)
-      covb1 <- covb[, -1]
-      colnames(covb1) <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
-      covb2 <- cbind(covb[, 1], covb1)
-      rownames(covb2) <- c("rho", colnames(covb2)[-1] )
-      colnames(covb2)[1] <- "rho"
-	    covb <- covb2
-    } else  covb <- NULL
-  }
-
-  list(runtime = runtime, rho = rho, be = be, dev = mod$deviance, covb = covb, est = est)
+  colnames(be) <- paste("Y", 2:D, sep = "")  
+  
+  list(runtime = runtime, rho = rho, be = be, dev = mod$deviance, est = est)
 }

@@ -9,7 +9,7 @@ The \eqn{\alpha}-SAR model.
 }
 
 \usage{
-alfa.sar(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL)
+alfa.sar(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
 }
 
 \arguments{
@@ -27,10 +27,6 @@ A matrix with the coordinates of the locations. The first column is the latitude
 }
 \item{k}{
 The number of nearest neighbours to consider for the contiguity matrix.
-}
-\item{covb}{
-If this is FALSE, the covariance matrix of the coefficients will not be returned. If however you set it
-equal to TRUE and the covariance matrix is not returned it means it was singular.
 }
 \item{xnew}{
 If you have new data use it, otherwise leave it NULL.

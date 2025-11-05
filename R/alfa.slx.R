@@ -1,4 +1,4 @@
-alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL) {
+alfa.slx <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL) {
 
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
@@ -71,25 +71,12 @@ alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
   if ( is.null( colnames(x) ) ) {
     rownames(be) <- c("constant", paste("X", 1:p, sep = ""), paste("WX", 1:p, sep = "") )
   } else  rownames(be)  <- c("constant", colnames(x)[-1], paste("W", colnames(x)[-1], sep = "") )
-
-  if ( covb ) {
-    covb <- try( solve(mod$hessian), silent = TRUE )
-    if ( !identical( class(covb), "try-error" ) ) {
-      a1 <- paste("Y", 2:D, sep = "")
-      a2 <- rownames(be)
-      rownames(covb) <- colnames(covb) <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
-      ind <- matrix(1: dim(covb)[1], ncol=d )
-      ind <- as.vector( ind[1:(p + 1), ] )
-      cov1 <- cbind( covb[ind, ind], covb[ind, -ind] )
-      cov2 <- cbind( covb[-ind, ind], covb[-ind, -ind] )
-      covb <- rbind(cov1, cov2)
-    } else  covb <- NULL
-  }
+  colnames(be) <- paste("Y", 2:D, sep = "")  
 
   gama <- be[(p + 2) : (2 * p + 1), ]
   be <- be[1:(p + 1), ]
 
-  list(runtime = runtime, be = be, gama = gama, dev = mod$deviance, covb = covb, est = est)
+  list(runtime = runtime, be = be, gama = gama, dev = mod$deviance, est = est)
 }
 
 

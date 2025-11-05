@@ -2,7 +2,7 @@ Package: CompositionalSR
 Type: Package
 Title: Spatial Regression Models with Compositional Data
 Version: 1.1
-Date: 2025-11-04
+Date: 2025-11-05
 Authors@R: person("Michail", "Tsagris", role = c("aut", "cre"), email = "mtsagris@uoc.gr") 
 Author: Michail Tsagris [aut, cre]
 Maintainer: Michail Tsagris <mtsagris@uoc.gr>

@@ -93,7 +93,7 @@ alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
       w_k <- w_k_diag + w_k_offdiag
       gradient[ beta_idx[[ k ]] ] <-  -crossprod(x, w_k)
     }
-    grad_norm <- sqrt(sum(gradient^2))
+    grad_norm <- sqrt( sum(gradient^2) )
     # Check convergence
     if ( grad_norm < tol ) {
       runtime <- proc.time() - runtime

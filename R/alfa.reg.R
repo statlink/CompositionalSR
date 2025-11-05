@@ -6,7 +6,7 @@
 #### Regression analysis with compositional data containing zero values
 #### Chilean Journal of Statistics, 6(2): 47-57
 ################################
-alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
+alfa.reg <- function(y, x, a, xnew = NULL, yb = NULL) {
 
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
@@ -60,17 +60,9 @@ alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
     p <- dim(x)[2] - 1
     rownames(be) <- c("constant", paste("X", 1:p, sep = "") )
   } else rownames(be)  <- c("constant", colnames(x)[-1] )
+  colnames(be) <- paste("Y", 2:D, sep = "")  
 
-  if ( covb )  {
-    covb <- try( solve(mod$hessian), silent = TRUE )
-    if ( !identical( class(covb), "try-error" ) ) {
-      a1 <- paste("Y", 2:D, sep = "")
-      a2 <- rownames(be)
-      rownames(covb) <- colnames(covb) <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
-    } else  covb <- NULL
-  }
-
-  list(runtime = runtime, be = be, dev = mod$deviance, covb = covb, est = est)
+  list(runtime = runtime, be = be, dev = mod$deviance, est = est)
 }
 
 

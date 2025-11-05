@@ -10,7 +10,7 @@ The \eqn{\alpha}-SLX model.
 }
 
 \usage{
-alfa.slx(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL)
+alfa.slx(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
 alfa.slx2(y, x, a, coords, k = 2:15, xnew = NULL, coordsnew, yb = NULL)
 }
 
@@ -29,10 +29,6 @@ A matrix with the coordinates of the locations. The first column is the latitude
 }
 \item{k}{
 The number of nearest neighbours to consider for the contiguity matrix. For the alfa.slx2() this should be a vector.
-}
-\item{covb}{
-If this is FALSE, the covariance matrix of the coefficients will not be returned. If however you set it
-equal to TRUE and the covariance matrix is not returned it means it was singular.
 }
 \item{xnew}{
 If you have new data use it, otherwise leave it NULL.
@@ -64,10 +60,6 @@ The gamma coefficients.
 }
 \item{dev}{
 The sum of the squared residuals, as produced by the function \bold{minpack.lm::nls.lm()}.
-}
-\item{covb}{
-The covariance matrix of the beta coefficients, or NULL if it is singular. If it is returned, the upper left block is the covariance matrix of the beta coefficients and the lower right block is the covariance matrix of the gama coefficients. It is in this way so as to pass it on to the marginal effects function
-\code{\link{me.aslx}}, if necessary.
 }
 \item{est}{
 The fitted values for xnew if xnew and coordsnew are not NULL.
