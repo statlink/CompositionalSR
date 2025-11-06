@@ -1,15 +1,15 @@
-\name{Hessian matrix of the alpha-SAR model}
-\alias{asar.hessian}
+\name{The gradient vector of the alpha-regression model at each observation}
+\alias{asar.grads}
 \title{
-Hessian matrix of the \eqn{\alpha}-SAR model
+The gradient vector of the \eqn{\alpha}-regression model at each observation
 }
 
 \description{
-Hessian matrix of the \eqn{\alpha}-SAR model.
+The gradient vector of the \eqn{\alpha}-regression model at each observation.
 }
 
 \usage{
-asar.hessian(y, x, a, rho, be, coords, k, verbose = TRUE)
+asar.grads(y, x, a, be)
 }
 
 \arguments{
@@ -22,29 +22,17 @@ A matrix with the continuous predictor variables or a data frame including categ
 \item{a}{
 The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0.
 }
-\item{rho}{
-The spatial autocorrelation parameter \eqn{\rho}.
-}
 \item{be}{
 The regression coefficients of the \eqn{\alpha}-SAR model.
-}
-\item{coords}{
-A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
-}
-\item{k}{
-The number of nearest neighbours to consider for the contiguity matrix.
-}
-\item{verbose}{
-If this is TRUE it prints the progress of the computations.
 }
 }
 
 \details{
-The Hessian matrix of the \eqn{\alpha}-SAR model is computed. The computations are too complex and take a while, even for the FADN example dataset.
+The gradient vector of the \eqn{\alpha}-regression model is computed at each observation.
 }
 
 \value{
-The Hessian matrix.
+A matrix with the gradient vector computed at each observation.
 }
 
 \references{
@@ -86,6 +74,5 @@ be <- matrix( c( 12.72191991, 0.04300266, -1.78301001, -3.02074120, -23.54785921
 0.06771573, 2.71969599, 1.89312564, 5.38640736, 0.05179626, -1.21336879, 0.40175088,
 -1.98258721, 0.06815682, -0.64458883, 0.95470802 ), ncol = 4 )
 grads <- asar.grads(y, x, a = 1, rho = -0.1479491, be, coords, k = 5)
-crossprod(grads)
 }
 

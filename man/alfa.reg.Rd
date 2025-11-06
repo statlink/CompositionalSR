@@ -11,7 +11,7 @@ Regression with compositional data using the \eqn{\alpha}-transformation.
 }
 
 \usage{
-alfa.reg(y, x, a, xnew = NULL, yb = NULL)
+alfa.reg(y, x, a, covb = FALSE, xnew = NULL, yb = NULL)
 alfa.reg2(y, x, a, xnew = NULL)
 alfa.reg3(y, x, a = c(-1, 1), xnew = NULL)
 }
@@ -32,6 +32,10 @@ interval of \eqn{\alpha}. This function searches for the optimal vaue of \eqn{\a
 between the observed and fitted compositions. Using the \code{\link{optimize}} function it searches for the optimal value of
 \eqn{\alpha}. Instead of choosing the value of \eqn{\alpha} using \code{\link{cv.alfareg}} (that uses cross-validation)
 one can select it this way.
+}
+\item{covbe}{
+Do you want the covariance matrix of the regression coefficients to be returned? If TRUE, this will slow down the process,
+as it is computed numerically.
 }
 \item{xnew}{
 If you have new data use it, otherwise leave it NULL.
@@ -55,6 +59,9 @@ The time required by the regression.
 }
 \item{be}{
 The beta coefficients.
+}
+\item{covbe}{
+The covariance matrix if covb was set to TRUE, otherwise NULL.
 }
 \item{dev}{
 The sum of the squared residuals, as produced by the function \bold{minpack.lm::nls.lm()}.

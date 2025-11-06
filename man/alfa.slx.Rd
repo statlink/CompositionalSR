@@ -10,7 +10,7 @@ The \eqn{\alpha}-SLX model.
 }
 
 \usage{
-alfa.slx(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
+alfa.slx(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL)
 alfa.slx2(y, x, a, coords, k = 2:15, xnew = NULL, coordsnew, yb = NULL)
 }
 
@@ -29,6 +29,10 @@ A matrix with the coordinates of the locations. The first column is the latitude
 }
 \item{k}{
 The number of nearest neighbours to consider for the contiguity matrix. For the alfa.slx2() this should be a vector.
+}
+\item{covbe}{
+Do you want the covariance matrix of the regression coefficients to be returned? If TRUE, this will slow down the process,
+as it is computed numerically.
 }
 \item{xnew}{
 If you have new data use it, otherwise leave it NULL.
@@ -57,6 +61,9 @@ The beta coefficients.
 }
 \item{gama}{
 The gamma coefficients.
+}
+\item{covbe}{
+The covariance matrix if covb was set to TRUE, otherwise NULL.
 }
 \item{dev}{
 The sum of the squared residuals, as produced by the function \bold{minpack.lm::nls.lm()}.

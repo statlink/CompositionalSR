@@ -1,4 +1,4 @@
-alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL) {
+alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL) {
 
   rega <- function(para, ya, W, ax, a, In, ha, d, D) {
     rho <- para[1]
@@ -100,5 +100,35 @@ alfa.sar <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
   } else rownames(be)  <- c("constant", colnames(x)[-1] )
   colnames(be) <- paste("Y", 2:D, sep = "")  
   
-  list(runtime = runtime, rho = rho, be = be, dev = mod$deviance, est = est)
+  if ( covb ) {
+    res <- optim( c(rho, as.vector(be)), .regsar, ya = ya, W = W, ax = ax, a = a,
+                  In = In, ha = ha, d = d, D = D, hessian = TRUE, method = "BFGS", 
+                  control = list(maxit = 1000) )
+    covbe <- solve(res$hessian) 
+    a2 <- colnames(x)
+    if ( is.null(a2) ) {
+      p <- dim(x)[2] - 1
+      a2 <- c("constant", paste("X", 1:p, sep = "") )
+    } else a2[1] <- "constant"
+    a1 <- paste("Y", 2:D, sep = "")
+    nam <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
+    colnames(covbe) <- rownames(covbe) <- c("rho", nam)
+  } else covb <- NULL  
+
+  list(runtime = runtime, rho = rho, be = be, covbe = covbe, dev = mod$deviance, est = est)
 }
+
+
+.regsar <- function(para, ya, W, ax, a, In, ha, d, D) {
+  rho <- para[1]
+  be <- matrix(para[-1], ncol = d)
+  if ( abs(rho) > 1e-4 ) {
+    sw <- In - rho * W
+    zz <- cbind( 1, exp( solve(sw, ax %*% be) ) )
+  } else  zz <- cbind( 1, exp( ax %*% be ) )
+  ta <- rowSums(zz)
+  za <- zz / ta
+  ma <- ( D / a * za - 1/a ) %*% ha
+  sum( (ya - ma)^2 )
+}
+

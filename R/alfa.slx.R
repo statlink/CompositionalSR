@@ -1,4 +1,4 @@
-alfa.slx <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL) {
+alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL) {
 
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
@@ -76,7 +76,17 @@ alfa.slx <- function(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
   gama <- be[(p + 2) : (2 * p + 1), ]
   be <- be[1:(p + 1), ]
 
-  list(runtime = runtime, be = be, gama = gama, dev = mod$deviance, est = est)
+  if ( covb ) {
+    res <- optim( as.vector(mod$be), .regar, ya = ya, ax = ax, a = a, ha = ha, d = d, 
+                    D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 1000) )
+    covbe <- solve(res$hessian)   
+    a2 <- rownames(be)
+    a1 <- colnames(be)
+    nam <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
+    colnames(covbe) <- rownames(covbe) <- nam
+  } else covbe <- NULL  
+
+  list(runtime = runtime, be = be, gama = gama, covbe = covbe, dev = mod$deviance, est = est)
 }
 
 

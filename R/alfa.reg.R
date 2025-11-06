@@ -6,7 +6,7 @@
 #### Regression analysis with compositional data containing zero values
 #### Chilean Journal of Statistics, 6(2): 47-57
 ################################
-alfa.reg <- function(y, x, a, xnew = NULL, yb = NULL) {
+alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
 
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
@@ -62,8 +62,27 @@ alfa.reg <- function(y, x, a, xnew = NULL, yb = NULL) {
   } else rownames(be)  <- c("constant", colnames(x)[-1] )
   colnames(be) <- paste("Y", 2:D, sep = "")  
 
-  list(runtime = runtime, be = be, dev = mod$deviance, est = est)
+  if ( covb ) {
+    res <- optim( as.vector(be), .regar, ya = ya, ax = ax, a = a, ha = ha, d = d, 
+                  D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 1000) )
+    covbe <- solve(res$hessian)   
+    a2 <- colnames(x)
+    a1 <- colnames(be)
+    nam <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
+    colnames(covbe) <- rownames(covbe) <- nam
+  } else covbe <- NULL  
+
+  list(runtime = runtime, be = be, covbe = covbe, dev = mod$deviance, est = est)
 }
 
+
+.regar <- function(para, ya, ax, a, ha, d, D) {
+  be <- matrix(para, ncol = d)
+  zz <- cbind( 1, exp(ax %*% be) )
+  ta <- rowSums(zz)
+  za <- zz / ta
+  ma <- ( D / a * za - 1/a ) %*% ha
+  sum( (ya - ma)^2 )
+}
 
 

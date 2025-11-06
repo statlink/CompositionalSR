@@ -9,7 +9,7 @@ The \eqn{\alpha}-SAR model.
 }
 
 \usage{
-alfa.sar(y, x, a, coords, k = 10, xnew = NULL, coordsnew, yb = NULL)
+alfa.sar(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL)
 }
 
 \arguments{
@@ -27,6 +27,10 @@ A matrix with the coordinates of the locations. The first column is the latitude
 }
 \item{k}{
 The number of nearest neighbours to consider for the contiguity matrix.
+}
+\item{covbe}{
+Do you want the covariance matrix of the spatial autoregressive parameter and the regression coefficients to be returned? 
+If TRUE, this will slow down the process, as it is computed numerically.
 }
 \item{xnew}{
 If you have new data use it, otherwise leave it NULL.
@@ -54,6 +58,9 @@ The beta coefficients.
 }
 \item{gama}{
 The gamma coefficients.
+}
+\item{covbe}{
+The covariance matrix if covb was set to TRUE, otherwise NULL.
 }
 \item{dev}{
 The sum of the squared residuals, as produced by the function \bold{minpack.lm::nls.lm()}.
