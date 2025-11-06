@@ -1,15 +1,15 @@
-\name{The gradient vector of the alpha-regression model at each observation}
-\alias{as.grads}
+\name{The gradient vector of the alpha-SLX model at each observation}
+\alias{aslx.grads}
 \title{
-The gradient vector of the \eqn{\alpha}-regression model at each observation
+The gradient vector of the \eqn{\alpha}-SLX model at each observation
 }
 
 \description{
-The gradient vector of the \eqn{\alpha}-regression model at each observation.
+The gradient vector of the \eqn{\alpha}-SLX model at each observation.
 }
 
 \usage{
-ar.grads(y, x, a, be)
+aslx.grads(y, x, a, be, gama, coords, k = 10)
 }
 
 \arguments{
@@ -23,12 +23,21 @@ A matrix with the continuous predictor variables or a data frame including categ
 The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0.
 }
 \item{be}{
-The regression coefficients of the \eqn{\alpha}-SAR model.
+The regression coefficients of the \eqn{\alpha}-SLX model.
+}
+\item{gama}{
+The gamma coefficients of the \eqn{\alpha}-SLX model.
+}
+\item{coords}{
+A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
+}
+\item{k}{
+The number of nearest neighbours to consider for the contiguity matrix.
 }
 }
 
 \details{
-The gradient vector of the \eqn{\alpha}-regression model is computed at each observation.
+The gradient vector of the \eqn{\alpha}-SLX model is computed at each observation.
 }
 
 \value{

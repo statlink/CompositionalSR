@@ -1,0 +1,12 @@
+aslx.grads <- function(y, x, a, be, gama, coords, k = 10) {
+
+  W <- CompositionalSR::contiguity(coords, k)
+  Wx <- W %*% x[, -1]
+  X <- cbind(x, Wx)
+  be <- rbind(be, gama)
+  gradient <- Compositional::ar.grads(y, x, a, be)
+  a2 <- rownames(be)
+  a1 <- paste("Y", 2:dim(y)[2], sep = "")
+  colnames(gradient) <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
+  gradient
+}
