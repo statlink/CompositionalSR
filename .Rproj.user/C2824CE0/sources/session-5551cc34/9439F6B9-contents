@@ -1,15 +1,15 @@
-\name{The gradient vector of the alpha-SLX model at each observation}
-\alias{aslx.grads}
+\name{The gradient vector of the alpha-regression model at each observation}
+\alias{ar.grads}
 \title{
-The gradient vector of the \eqn{\alpha}-SLX model at each observation
+The gradient vector of the \eqn{\alpha}-regression model at each observation
 }
 
 \description{
-The gradient vector of the \eqn{\alpha}-SLX model at each observation.
+The gradient vector of the \eqn{\alpha}-regression model at each observation.
 }
 
 \usage{
-aslx.grads(y, x, a, be, gama, coords, k = 10)
+ar.grads(y, x, a, be)
 }
 
 \arguments{
@@ -23,21 +23,12 @@ A matrix with the continuous predictor variables or a data frame including categ
 The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0.
 }
 \item{be}{
-The regression coefficients of the \eqn{\alpha}-SLX model.
-}
-\item{gama}{
-The gamma coefficients of the \eqn{\alpha}-SLX model.
-}
-\item{coords}{
-A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
-}
-\item{k}{
-The number of nearest neighbours to consider for the contiguity matrix.
+The regression coefficients of the \eqn{\alpha}-SAR model.
 }
 }
 
 \details{
-The gradient vector of the \eqn{\alpha}-SLX model is computed at each observation.
+The gradient vector of the \eqn{\alpha}-regression model is computed at each observation.
 }
 
 \value{
@@ -77,9 +68,9 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 data(fadn)
 coords <- fadn[, 1:2]
 y <- fadn[, 3:7]
-x <- fadn[, 8]
-mod <- alfa.slx(y, x, a = 0.5, coords, k = 10)
-grads <- aslx.grads(y, x, a = 0.5, mod$be, mod$gama, coords, k = 10)
+x <- fadn[, 8:10]
+mod <- alfa.reg(y, x, 0.5)
+grads <- ar.grads(y, x, a = 0.5, mod$be)
 colSums(grads)
 }
 
