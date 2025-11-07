@@ -1,0 +1,19 @@
+#useDynLib(Compositional, .registration = TRUE)
+
+importFrom("Compositional", alfa, comp.reg, helm)
+importFrom("Rfast", rowsums, rowOrder, colmeans, rowMins, Dist, dista, eachcol.apply)
+importFrom("stats", model.matrix, as.formula, coef, optimize, rnorm, optim)
+importFrom("minpack.lm", nls.lm, nls.lm.control)
+importFrom("sf", st_as_sf)
+importFrom("blockCV", cv_spatial)
+importFrom("estats", dcov.test)
+importFrom("utils", "flush.console")
+
+import("doParallel")
+import("parallel")
+import("foreach")
+
+exportPattern("^[[:alpha:]]+")
+exportPattern("^[^\\.]")
+export(.onAttach)
+

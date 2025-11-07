@@ -1,0 +1,14 @@
+aslx.grads <- function(y, x, a, be, gama, coords, k = 10) {
+
+  W <- CompositionalSR::contiguity(coords, k)
+  Wx <- W %*% x
+  nam <- colnames(x)
+  if ( is.null( nam ) ) {
+    p <- NCOL(x) 
+    nam <- paste("WX", 1:p, sep = "") 
+  }
+  colnames(Wx) <- nam
+  X <- cbind(x, Wx)
+  be <- rbind(be, gama)
+  CompositionalSR::ar.grads(y, X, a, be)
+}
