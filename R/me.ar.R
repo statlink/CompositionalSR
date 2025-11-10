@@ -16,12 +16,12 @@ me.ar <- function(be, mu, x, cov_be = NULL) {
 
   mfx_array <- array(0, dim = c(n, D, p))
 
-  for (k in 1:p) {
+  for ( k in 1:p ) {
     # Calculate common term:
     com <- numeric(n)
-    for (j in 1:d)  com <- com + be[j, k] * mu[, j+1]
+    for ( j in 1:d )  com <- com + be[j, k] * mu[, j+1]
     # Reference component (i=1)
-    mfx_array[, 1, k] <- -mu[, 1] * com
+    mfx_array[, 1, k] <-  -mu[, 1] * com
     # Other components (i=2,...,D)
     for (i in 2:D)  mfx_array[, i, k] <- mu[, i] * (be[i-1, k] - com)
   }
@@ -42,14 +42,14 @@ me.ar <- function(be, mu, x, cov_be = NULL) {
     # Pre-calculate derivatives of mu with respect to beta
     dmu_dbeta <- array(0, dim = c(n, D, d, p))
 
-    for (i in 1:n) {
+    for ( i in 1:n ) {
       mu_i <- mu[i, ]
       x_i <- x[i, ]
 
-      for (j in 1:D) {
-        for (k in 1:d) {
-          for (l in 1:p) {
-            if (j == 1) {
+      for ( j in 1:D ) {
+        for ( k in 1:d ) {
+          for ( l in 1:p ) {
+            if ( j == 1 ) {
               # Reference component
               dmu_dbeta[i, 1, k, l] <- -mu_i[1] * mu_i[k+1] * x_i[l]
             } else if (j == k + 1) {
@@ -67,59 +67,51 @@ me.ar <- function(be, mu, x, cov_be = NULL) {
     # J_ame has dimension (D*p) x (d*p)
     J_ame <- matrix(0, nrow = D * p, ncol = d * p)
 
-    for (i in 1:n) {
+    for ( i in 1:n ) {
       mu_i <- mu[i, ]
       row_idx <- 1
 
-      for (comp in 1:D) {
-        for (cov in 1:p) {
+      for ( comp in 1:D ) {
+        for ( cov in 1:p ) {
           # Derivatives with respect to beta
-          for (m in 1:d) {
-            for (s in 1:p) {
+          for ( m in 1:d ) {
+            for ( s in 1:p ) {
               beta_col <- (s - 1) * d + m
-              if (comp == 1) {
+              if ( comp == 1 ) {
                 # Reference component
-                if (s == cov) {
+                if ( s == cov ) {
                   J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] -
-                    mu_i[1] * mu_i[m+1] / n
+                  mu_i[1] * mu_i[m+1] / n
                 }
 
                 common_sum <- 0
-                for (j in 1:d) {
-                  common_sum <- common_sum + be[j, cov] * mu_i[j+1]
-                }
+                for ( j in 1:d )  common_sum <- common_sum + be[j, cov] * mu_i[j+1]
                 J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] -
                   dmu_dbeta[i, 1, m, s] * common_sum / n
 
-                for (j in 1:d) {
+                for ( j in 1:d ) {
                   J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] -
-                    mu_i[1] * be[j, cov] *
-                    dmu_dbeta[i, j+1, m, s] / n
+                  mu_i[1] * be[j, cov] * dmu_dbeta[i, j+1, m, s] / n
                 }
 
               } else {
                 # Other components
-                if (s == cov) {
-                  if (m == comp - 1) {
-                    J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] +
-                      mu_i[comp] / n
+                if ( s == cov ) {
+                  if ( m == comp - 1 ) {
+                    J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] + mu_i[comp] / n
                   }
-                  J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] -
-                    mu_i[comp] * mu_i[m+1] / n
+                  J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] - mu_i[comp] * mu_i[m+1] / n
                 }
 
                 bracket_term <- be[comp-1, cov]
-                for (j in 1:d) {
-                  bracket_term <- bracket_term - be[j, cov] * mu_i[j+1]
-                }
+                for ( j in 1:d )  bracket_term <- bracket_term - be[j, cov] * mu_i[j+1]
 
                 J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] +
-                  dmu_dbeta[i, comp, m, s] * bracket_term / n
+                        dmu_dbeta[i, comp, m, s] * bracket_term / n
 
                 for (j in 1:d) {
                   J_ame[row_idx, beta_col] <- J_ame[row_idx, beta_col] -
-                    mu_i[comp] * be[j, cov] *
-                    dmu_dbeta[i, j+1, m, s] / n
+                       mu_i[comp] * be[j, cov] * dmu_dbeta[i, j+1, m, s] / n
                 }
               }
             }
@@ -131,7 +123,7 @@ me.ar <- function(be, mu, x, cov_be = NULL) {
     }
 
     cov_ame <- J_ame %*% cov_be %*% t(J_ame)
-    se_vec <- sqrt(diag(cov_ame))
+    se_vec <- sqrt( diag(cov_ame) )
     se.ame <- t( matrix(se_vec, nrow = D, ncol = p, byrow = FALSE) )
     dimnames(se.ame) <- list(covariate = cov_names, component = comp_names)
   }

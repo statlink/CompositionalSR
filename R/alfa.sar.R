@@ -105,6 +105,7 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
                   In = In, ha = ha, d = d, D = D, hessian = TRUE, method = "BFGS",
                   control = list(maxit = 1000) )
     covbe <- solve(res$hessian)
+    diag(covbe) <- abs( diag(covbe) )
     a2 <- colnames(x)
     if ( is.null(a2) ) {
       p <- dim(x)[2] - 1
