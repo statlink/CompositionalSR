@@ -25,8 +25,6 @@ alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
   if ( a <= 1e-5 ) {
     mod <- Compositional::comp.reg(y, X[, -1], yb = yb)
     be <- mod$be
-    if ( !is.null(seb) )  seb <- mod$seb
-    runtime <- mod$runtime
 
   } else {
     aX <- a * X
