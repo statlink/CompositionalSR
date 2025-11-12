@@ -1,132 +1,114 @@
 asar.grads <- function(y, x, a, rho, be, coords, k) {
 
-  n <- dim(y)[1]  ;  D <- dim(y)[2]
-  d <- D - 1
-  x <- model.matrix(y~., data = as.data.frame(x) )
-  p <- dim(x)[2]
-  total_params <- d * p + 1
   W <- CompositionalSR::contiguity(coords, k)
-
-  B <- t(be)
+  x <- model.matrix( y~., data = as.data.frame(x) )
+  n <- dim(x)[1]  ;  p <- dim(x)[2]
+  D <- dim(y)[2]  ;  d <- D - 1
+  # Compute S(rho) = I - rho*W and its inverse
   I_n <- diag(n)
-  S_inv <- solve(I_n - rho * W)
-  x_tilde <- S_inv %*% x
-  zz <- cbind( 1, exp( x_tilde %*% be) )
-  ta <- Rfast::rowsums(zz)
-  mu <- round(zz / ta, 9)
-  ya <- Compositional::alfa(y, a)$aff
-  mua <- Compositional::alfa(mu, a)$aff
-  R_a <- ya - mua
+  S_rho <- I_n - rho * W
+  S_rho_inv <- solve(S_rho)
+  # Compute transformed covariates
+  x_tilde <- S_rho_inv %*% x
   H <- Compositional::helm(D)
-  grad_matrix <- matrix(0, nrow = n, ncol = total_params)
-  dx_tilde_drho <- S_inv %*% W %*% x_tilde
-
-  # --- Compute gradient for each observation ---
+  # Column order: rho, then component1 (all p covariates), component2, ..., component_d
+  grad_matrix <- matrix(0, nrow = n, ncol = 1 + p * d)
+  
+  mu <- cbind(1, exp(x_tilde %*% be) )
+  mu <- mu / Rfast::rowsums(mu)
+  mu_alpha <- Compositional::alfa(mu, a)$aff   
+  y_alpha <- Compositional::alfa(y, a)$aff
+  # Residuals in alpha-space
+  r_alpha <- y_alpha - mu_alpha
+  
+  # Compute gradients for each observation
   for ( i in 1:n ) {
-    grad_params <- numeric(total_params)
-    param_idx <- 1
-    # --- Gradient w.r.t. each beta_k ---
-    for ( k in 1:d ) {
-      for ( s in 1:p ) {
-        # Gradient w.r.t. beta_ks
-        grad_val <- 0
-        for ( j in 1:d ) {
-          dmu_a_dbeta <- .compute_dmu_a_dbeta_single(mu[i,], x_tilde[i,], H, a, j, k, s)
-          grad_val <- grad_val + R_a[i, j] * dmu_a_dbeta
-        }
-        grad_params[param_idx] <- grad_val
-        param_idx <- param_idx + 1
+    x_tilde_i <- x_tilde[i, ]
+    mu_i <- mu[i, ]
+    # Compute Jacobian of power transformation
+    T_i <- sum(mu_i^a)
+    J_u <- matrix(0, D, D)
+    for ( ell in 1:D ) {
+      for ( p_idx in 1:D ) {
+        J_u[ell, p_idx] <- (a * mu_i[p_idx]^(a-1) / T_i) * 
+          ( ifelse(ell == p_idx, 1, 0) - mu_i[ell]^a / T_i )
       }
     }
-    # --- Gradient w.r.t. rho ---
-    grad_rho <- 0
-    for ( j in 1:d ) {
-      dmu_a_drho <- .compute_dmu_a_drho_single(mu[i,], x_tilde[i,], dx_tilde_drho[i,], B, H, a, j)
-      grad_rho <- grad_rho + R_a[i, j] * dmu_a_drho
+    # Store gradients in matrix (starting with rho)
+    col_idx <- 1  # Start with rho
+    # Compute gradient with respect to rho (first column)
+    dx_tilde_drho <- S_rho_inv %*% W %*% x_tilde
+    
+    dmu_drho <- numeric(D)
+    for ( comp in 1:D ) {
+      if (comp == 1 ) {
+        dmu_dcomp_drho <- 0
+        for ( j in 1:d ) {
+          dmu_dcomp_drho <- dmu_dcomp_drho - mu_i[1] * mu_i[j+1] * sum(be[, j] * dx_tilde_drho[i, ])
+        }
+        dmu_drho[comp] <- dmu_dcomp_drho
+      } else {
+        k <- comp - 1
+        term1 <- mu_i[comp] * sum(be[, k] * dx_tilde_drho[i, ])
+        term2 <-  -mu_i[comp] * sum( sapply(1:d, function(j) {
+          mu_i[j+1] * sum( be[, j] * dx_tilde_drho[i, ]) } ) )
+        dmu_drho[comp] <- term1 + term2
+      }
     }
-    grad_params[param_idx] <- grad_rho
-    grad_matrix[i, ] <- grad_params
+    
+    dmu_alpha_drho <- numeric(d)
+    for ( j in 1:d ) {
+      sum_val <- 0
+      for ( ell in 1:D ) {
+        for ( p_idx in 1:D ) {
+          sum_val <- sum_val + H[j, ell] * J_u[ell, p_idx] * dmu_drho[p_idx]
+        }
+      }
+      dmu_alpha_drho[j] <- D/a * sum_val
+    }
+    
+    grad_matrix[i, col_idx] <- -2 * sum(r_alpha[i, ] * dmu_alpha_drho)
+    col_idx <- col_idx + 1
+    # Compute gradients with respect to beta coefficients
+    # Order: component1 (all p covariates), component2, ..., component_d
+    for ( k in 1:d ) {  # For each component
+      for ( s in 1:p ) {  # For each covariate
+        # Compute derivative of mu with respect to beta_sk
+        dmu_dbeta <- numeric(D)
+        for ( comp in 1:D ) {
+          if ( comp == 1 ) {
+            dmu_dbeta[comp] <-  -mu_i[1] * mu_i[k+1] * x_tilde_i[s]
+          } else if ( comp == k+1 ) {
+            dmu_dbeta[comp] <- mu_i[comp] * (1 - mu_i[comp]) * x_tilde_i[s]
+          } else {
+            dmu_dbeta[comp] <- -mu_i[comp] * mu_i[k+1] * x_tilde_i[s]
+          }
+        }
+        # Compute derivative of mu_alpha with respect to beta_sk
+        dmu_alpha_dbeta <- numeric(d)
+        for ( j in 1:d ) {
+          sum_val <- 0
+          for ( ell in 1:D ) {
+            for ( p_idx in 1:D ) {
+              sum_val <- sum_val + H[j, ell] * J_u[ell, p_idx] * dmu_dbeta[p_idx]
+            }
+          }
+          dmu_alpha_dbeta[j] <- D/a * sum_val
+        }
+        
+        grad_matrix[i, col_idx] <- -2 * sum(r_alpha[i, ] * dmu_alpha_dbeta)
+        col_idx <- col_idx + 1
+      }
+    }
   }
-
-  grad_matrix <- grad_matrix[, c(param_idx, 1:c(d * p) ) ]
 
   a2 <- colnames(x)
   if ( is.null(a2) ) {
     p <- dim(x)[2] - 1
-    a2 <- c("constant", paste("X", 1:p, sep = "") )
+     a2 <- c("constant", paste("X", 1:p, sep = "") )
   } else a2[1] <- "constant"
   a1 <- paste("Y", 2:D, sep = "")
-  nam <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
-  colnames(grad_matrix) <- c("rho", nam)
+  colnames(grad_matrix) <- c("rho", as.vector( t( outer(a1, a2, paste, sep = ":") ) ) )
+  
   grad_matrix
 }
-
-
-# Compute derivative of mu_a[j] w.r.t. be for a single observation
-.compute_dmu_a_dbeta_single <- function( mu_i, x_tilde_i, H, a, j, k, s ) {
-
-  D <- length(mu_i)
-  T_i <- sum(mu_i^a)
-  result <- 0
-
-  for (ell in 1:D) {
-    for (p in 1:D) {
-      # Derivative of power transformation: du_ell / dmu_p
-      if (ell == p) {
-        du_dmu <- (a * mu_i[p]^(a-1) / T_i) * (1 - mu_i[ell]^a / T_i)
-      } else  du_dmu <- -(a * mu_i[ell]^a * mu_i[p]^(a-1)) / T_i^2
-      # Derivative of multinomial logit: dmu_p / dbeta_ks
-      if (p == 1) {
-        # Reference category
-        dmu_dbeta <- -mu_i[1] * mu_i[k+1] * x_tilde_i[s]
-      } else if (p == k + 1) {
-        # Same category as k
-        dmu_dbeta <- mu_i[p] * (1 - mu_i[p]) * x_tilde_i[s]
-      } else {
-        # Other categories
-        dmu_dbeta <- -mu_i[p] * mu_i[k+1] * x_tilde_i[s]
-      }
-
-      result <- result + H[j, ell] * du_dmu * dmu_dbeta
-    }
-  }
-
-  (D / a) * result
-}
-
-
-# Compute derivative of mu_a[j] w.r.t. rho for a single observation
-.compute_dmu_a_drho_single <- function( mu_i, x_tilde_i, dx_tilde_drho_i, B, H, a, j ) {
-
-  D <- length(mu_i)
-  d <- D - 1
-  T_i <- sum(mu_i^a)
-  result <- 0
-
-  for ( ell in 1:D ) {
-    for ( p in 1:D ) {
-      # Derivative of power transformation
-      if (ell == p) {
-        du_dmu <- (a * mu_i[p]^(a-1) / T_i) * (1 - mu_i[ell]^a / T_i)
-      } else  du_dmu <- -(a * mu_i[ell]^a * mu_i[p]^(a-1)) / T_i^2
-      # Derivative of mu_p w.r.t. rho (through x_tilde)
-      dmu_drho <- 0
-      if (p == 1) {
-        # Reference category
-        for (k in 1:d)  dmu_drho <- dmu_drho - mu_i[1] * mu_i[k+1] * sum(B[k,] * dx_tilde_drho_i)
-      } else {
-        # Other categories
-        k <- p - 1
-        # Direct effect
-        dmu_drho <- mu_i[p] * sum(B[k,] * dx_tilde_drho_i)
-        # Indirect effect (through denominator)
-        for (m in 1:d)  dmu_drho <- dmu_drho - mu_i[p] * mu_i[m+1] * sum(B[m,] * dx_tilde_drho_i)
-      }
-      result <- result + H[j, ell] * du_dmu * dmu_drho
-    }
-  }
-
-  (D / a) * result
-}
-
-

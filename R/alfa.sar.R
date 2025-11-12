@@ -67,7 +67,6 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
                                  control = minpack.lm::nls.lm.control(maxiter = 10000), lower = c(bou[1], rep(-Inf, p * d) ),
                                  upper = c(bou[2], rep(Inf, p * d) ) )
     })
-
     rho <- mod$par[1]
     be <- matrix(mod$par[-1], ncol = d)
   }  ## end if (a == 0)
