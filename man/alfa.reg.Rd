@@ -12,7 +12,7 @@ Regression with compositional data using the \eqn{\alpha}-transformation.
 
 \usage{
 alfa.reg(y, x, a, covb = FALSE, xnew = NULL, yb = NULL)
-alfa.reg2(y, x, a, xnew = NULL)
+alfa.reg2(y, x, a, xnew = NULL, ncores = 1)
 alfa.reg3(y, x, a = c(-1, 1), xnew = NULL)
 }
 
@@ -38,6 +38,9 @@ Do you want the covariance matrix of the regression coefficients to be returned?
 }
 \item{xnew}{
 If you have new data use it, otherwise leave it NULL.
+}
+\item{ncores}{
+The number of cores to use for parallel computations. 
 }
 \item{yb}{
 If you have already transformed the data using the \eqn{\alpha}-transformation with the same \eqn{\alpha} as given in the argument "a", put it here. Othewrise leave it NULL.
@@ -83,7 +86,7 @@ Chilean Journal of Statistics, 6(2): 47-57.
 https://arxiv.org/pdf/1508.01913v1.pdf
 
 Tsagris M.T., Preston S. and Wood A.T.A. (2011). A data-based power transformation for
-compositional data.
+compositional data. 
 In Proceedings of the 4th Compositional Data Analysis Workshop, Girona, Spain.
 https://arxiv.org/pdf/1106.1451.pdf
 
