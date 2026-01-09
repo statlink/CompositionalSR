@@ -13,7 +13,7 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
     as.vector(ya - ma)
   }
 
-  regarho <- function(para, sw, ya, W, ax, a, ha, d, D) {
+  regarho <- function(para, sw, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
     zz <- cbind( 1, exp( sw %*% (ax %*% be) ) )
     ta <- rowSums(zz)
