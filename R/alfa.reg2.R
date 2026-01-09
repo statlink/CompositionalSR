@@ -15,7 +15,7 @@ alfa.reg2 <- function(y, x, a, xnew = NULL) {
   D <- dim(y)[2]
   d <- D - 1  ## dimensionality of the simplex
   p <- dim(x)[2] - 1
-  x <- model.matrix(ya ~., data.frame(x) )
+  x <- model.matrix(y ~., data.frame(x) )
   ha <- t( Compositional::helm(D) )
   if ( is.null( colnames(x) ) ) {
     namx <- c("constant", paste("X", 1:p, sep = "") )
