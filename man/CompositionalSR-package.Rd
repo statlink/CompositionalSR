@@ -15,7 +15,7 @@ The models includes are the \eqn{\alpha}-regression (not spatial), the \eqn{\alp
 Package: \tab CompositionalSR\cr
 Type: \tab Package\cr
 Version: \tab 1.1 \cr
-Date: \tab 2025-11-05\cr
+Date: \tab 2026-01-09\cr
 License: \tab GPL-2\cr
 }
 }
