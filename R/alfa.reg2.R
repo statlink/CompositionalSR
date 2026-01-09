@@ -30,7 +30,6 @@ alfa.reg2 <- function(y, x, a, xnew = NULL) {
     if ( a[i] <= 1e-4 ) {
       mod <- Compositional::comp.reg(y, x[, -1], yb = NULL)
       be <- mod$be
-      if ( !is.null(seb) )  seb <- mod$seb
 
     } else {
       ya <- Compositional::alfa(y, a[i])$aff
