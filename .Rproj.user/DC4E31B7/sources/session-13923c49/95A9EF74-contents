@@ -1,4 +1,4 @@
-alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
+alfa.reg2 <- function(y, x, a, xnew = NULL, parallel = FALSE, ncores = 1) {
 
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
