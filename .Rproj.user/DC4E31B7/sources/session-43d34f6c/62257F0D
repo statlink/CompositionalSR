@@ -1,26 +1,26 @@
 {
-    "id": "43078382",
-    "path": "~/GitHub/CompositionalSR/man/gwar.Rd",
-    "project_path": "man/gwar.Rd",
+    "id": "62257F0D",
+    "path": "~/GitHub/CompositionalSR/man/me.asar.Rd",
+    "project_path": "man/me.asar.Rd",
     "type": "r_doc",
     "hash": "0",
     "contents": "",
     "dirty": false,
-    "created": 1772009962176.0,
+    "created": 1772015125182.0,
     "source_on_save": false,
-    "relative_order": 3,
+    "relative_order": 4,
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "85,0",
-        "scrollLine": "0"
+        "cursorPosition": "109,0",
+        "scrollLine": "91"
     },
     "folds": "",
-    "lastKnownWriteTime": 1772009999,
+    "lastKnownWriteTime": 1772015137,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1772009999871,
+    "last_content_update": 1772015137634,
     "read_only": false,
     "read_only_alternatives": []
 }
