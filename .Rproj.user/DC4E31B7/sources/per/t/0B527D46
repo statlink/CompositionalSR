@@ -3,7 +3,7 @@
     "path": "~/GitHub/CompositionalSR/R/gwar.R",
     "project_path": "R/gwar.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "1677631246",
     "contents": "",
     "dirty": false,
     "created": 1772009904217.0,
@@ -12,8 +12,8 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "60,55",
-        "scrollLine": "47"
+        "cursorPosition": "36,19",
+        "scrollLine": "25"
     },
     "folds": "",
     "lastKnownWriteTime": 1772009927,
