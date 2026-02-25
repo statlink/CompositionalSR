@@ -34,7 +34,7 @@ ar.grads <- function(y, x, a, be) {
       for ( m in 1:d ) {
         for ( ell in 1:D ) {
           for ( pp in 1:D ) {
-            # Combine all terms: r_a · H · Ju · Jmu
+            # Combine all terms: r_a x H x Ju x Jmu
             weight_ik <- weight_ik + r_a[i, m] * (D / a) * H[m, ell] * Ju_i[ell, pp] * Jmu_i_k[pp]
           }
         }
