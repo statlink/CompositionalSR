@@ -24,7 +24,7 @@ ar.grads <- function(y, x, a, be) {
     Ju_i <- .compute_Ju(mu[i, ], a)
     # Store gradient as p x d matrix temporarily
     grad_i <- matrix(0, p, d)
-    # For each component k (corresponding to β_k)
+    # For each component k (corresponding to b_k)
     for ( k in 1:d ) {
       # Compute Jacobian of multinomial logit
       Jmu_i_k <- .compute_Jmu(mu[i, ], k)
@@ -34,14 +34,14 @@ ar.grads <- function(y, x, a, be) {
       for ( m in 1:d ) {
         for ( ell in 1:D ) {
           for ( pp in 1:D ) {
-            # Combine all terms: r_α · H · Ju · Jmu
+            # Combine all terms: r_a · H · Ju · Jmu
             weight_ik <- weight_ik + r_a[i, m] * (D / a) * H[m, ell] * Ju_i[ell, pp] * Jmu_i_k[pp]
           }
         }
       }
       # Store weight
       weights_per_component[k, i] <- weight_ik
-      # Gradient for component k: weight × covariate vector
+      # Gradient for component k: weight x covariate vector
       # grad_i[, k] is a p-vector (column k)
       grad_i[, k] <- weight_ik * x[i, ]
     }
@@ -62,7 +62,7 @@ ar.grads <- function(y, x, a, be) {
 .compute_Ju <- function(mu_i, a) {
   D <- length(mu_i)
   if (abs(a) < 1e-9) {
-    # For α → 0, use log-ratio derivative
+    # For a -> 0, use log-ratio derivative
     Ju <- matrix(0, D, D)
     for ( ell in 1:D ) {
       for ( p in 1:D ) {
@@ -91,9 +91,9 @@ ar.grads <- function(y, x, a, be) {
   return(Ju)
 }
 
-# Compute Jacobian of multinomial logit: ∂μ_p/∂β_k
+# Compute Jacobian of multinomial logit: 
 # Returns D-dimensional vector (one value for each component p)
-# k is 1-indexed (k=1 corresponds to β_1)
+# k is 1-indexed (k=1 corresponds to b_1)
 .compute_Jmu <- function(mu_i, k) {
   D <- length( mu_i )
   mu_k <- mu_i[k + 1]  # The (k+1)-th component

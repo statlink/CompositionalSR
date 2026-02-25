@@ -1,5 +1,5 @@
 ################################################################################
-# Marginal Effects for α-SAR Model
+# Marginal Effects for a-SAR Model
 ################################################################################
 me.asar <- function(be, rho, mu, x, coords, k, cov_theta= NULL) {
   
@@ -132,7 +132,7 @@ me.asar <- function(be, rho, mu, x, coords, k, cov_theta= NULL) {
 }
 
 ## Compute derivative of mu with respect to transformed covariate
-## This is the same formula as in the standard α-regression
+## This is the same formula as in the standard a-regression
 .compute_dmu_dtilde <- function( mu_i, beta, d, D, k ) {
   dmu <- numeric(D)
   # For component 1 (reference)
