@@ -2,7 +2,7 @@
 
 importFrom("Compositional", alfa, comp.reg, helm)
 importFrom("Rfast", rowsums, rowOrder, colmeans, rowMins, Dist, dista, eachcol.apply)
-importFrom("stats", model.matrix, as.formula, coef, optimize, rnorm, optim)
+importFrom("stats", model.matrix, as.formula, coef, optimize, optim)
 importFrom("minpack.lm", nls.lm)
 importFrom("sf", st_as_sf)
 importFrom("blockCV", cv_spatial)
