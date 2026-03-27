@@ -1,15 +1,15 @@
-alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
+alfareg.nr2 <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
                         tol = 1e-6, line_search = TRUE) {
-
+  
   runtime <- proc.time()
   x <- model.matrix(y ~., data.frame(x))
   n <- nrow(x);  D <- ncol(y);  d <- D - 1L;  p <- ncol(x)
   total_params <- d * p
-
+  
   if (is.null(beta_init)) {
     beta_vec <- rep(0, total_params)
   } else beta_vec <- beta_init
-
+  
   # ===== Precompute constants (never change across iterations) =====
   H            <- Compositional::helm(D)          # d x D
   tH           <- t(H)                             # D x d
@@ -18,33 +18,33 @@ alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
   inv_alpha    <- 1 / alpha
   beta_idx     <- lapply(1:d, function(k) ((k - 1L) * p + 1L):(k * p))
   reg_mat      <- diag(1e-8, total_params)
-
+  
   # Initialise Hess so convergence-on-first-iter does not error
   Hess <- reg_mat
-
+  
   for (iter in 1:max_iter) {
-
+    
     # ===== Fitted values =====
     beta_list <- matrix(beta_vec, ncol = d)
     mu  <- cbind(1, exp(x %*% beta_list))
     mu  <- mu / Rfast::rowsums(mu)                 # FIX: was not assigned in original
-
+    
     # ===== Shared quantities =====
     mu_alpha    <- mu^alpha                         # n x D
     mu_alpha_m1 <- mu^(alpha - 1)                   # n x D
     T_sum_inv   <- 1 / Rfast::rowsums(mu_alpha)     # n
     T_sum_inv2  <- T_sum_inv^2                       # n
-
+    
     # Inline alfa(mu, alpha) — reuses mu_alpha and T_sum_inv already computed
     ma      <- (D_over_alpha * mu_alpha * T_sum_inv - inv_alpha) %*% tH
     R_alpha <- ya - ma
     obj_val <- sum(R_alpha^2)
-
+    
     J_diag       <- alpha * mu_alpha_m1 * T_sum_inv * (1 - mu_alpha * T_sum_inv)  # n x D
     alpha_T_inv2 <- -alpha * T_sum_inv2                                             # n
     mu2          <- mu_alpha * mu_alpha_m1                                          # mu^(2a-1), n x D
     R_H          <- D_over_alpha * (R_alpha %*% H)                                 # n x D
-
+    
     # ===== J_mu_all: vectorized, no inner pp loop =====
     # J_mu[i, j, k] = mu[i,j] * (delta_{j, k+1} - mu[i, k+1])
     J_mu_all <- array(0, dim = c(n, D, d))
@@ -53,29 +53,29 @@ alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
       J_mu_all[, , k]    <- -mu * mu_k              # covers all j via broadcast
       J_mu_all[, k+1L, k] <- mu_k * (1 - mu_k)     # fix diagonal
     }
-
+    
     # ===== dM_all: vectorized inner ell loop + save sums for gradient reuse =====
     dM_all     <- array(0, dim = c(n, d, d))
     sum_m1_J_saved <- matrix(0, nrow = n, ncol = d)  # reused in gradient
-
+    
     for (k in 1:d) {
       J_mu_k  <- J_mu_all[, , k]                        # n x D
       sum_m1_J <- Rfast::rowsums(mu_alpha_m1 * J_mu_k)  # n
       sum_m1_J_saved[, k] <- sum_m1_J
-
+      
       # Single vectorized expression — replaces inner ell loop
       J_u_J_mu <- J_diag * J_mu_k +
         alpha_T_inv2 * mu_alpha  * sum_m1_J -
         alpha_T_inv2 * mu2       * J_mu_k      # n x D
-
+      
       dM_all[, , k] <- D_over_alpha * (J_u_J_mu %*% tH) # n x d
     }
-
+    
     # ===== Gradient: reuse sum_m1_J_saved =====
     gradient         <- numeric(total_params)
     R_H_mu_alpha     <- R_H * mu_alpha
     sum_R_H_mu_alpha <- Rfast::rowsums(R_H_mu_alpha)     # n
-
+    
     for (k in 1:d) {
       J_mu_k    <- J_mu_all[, , k]
       w_diag    <- Rfast::rowsums(R_H * J_diag * J_mu_k)
@@ -84,14 +84,14 @@ alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
         (sum_R_H_mu_alpha * sum_m1_J_saved[, k] - diag_prod)
       gradient[beta_idx[[k]]] <- -crossprod(x, w_diag + w_offdiag)
     }
-
+    
     grad_norm <- sqrt(sum(gradient^2))
     if (grad_norm < tol) {
       runtime <- proc.time() - runtime
       return(list(runtime = runtime, iters = iter, objective = obj_val,
                   be = beta_list, est = mu, covb = solve(Hess)))
     }
-
+    
     # ===== Hessian: exploit symmetry — compute only d*(d+1)/2 blocks =====
     Hess <- matrix(0, total_params, total_params)
     for (k in 1:d) {
@@ -105,20 +105,20 @@ alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
       }
     }
     Hess <- Hess + reg_mat
-
+    
     # ===== Newton direction =====
     direction <- tryCatch(
       solve(Hess, -gradient),
       error = function(e) -gradient / max(grad_norm, 1e-8)
     )
-
+    
     # ===== Line search =====
     if (line_search) {
       step         <- 1.0
       c1           <- 1e-4
       rho          <- 0.5
       grad_dot_dir <- sum(gradient * direction)
-
+      
       for (bt in 1:20) {
         beta_new     <- beta_vec + step * direction
         mu_new       <- cbind(1, exp(x %*% matrix(beta_new, ncol = d)))
@@ -126,7 +126,7 @@ alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
         mua_new      <- mu_new^alpha                        # inline alfa()
         ma_new       <- (D_over_alpha * mua_new / Rfast::rowsums(mua_new) - inv_alpha) %*% tH
         obj_new      <- sum((ya - ma_new)^2)
-
+        
         if (obj_new <= obj_val + c1 * step * grad_dot_dir) {
           beta_vec <- beta_new
           break
@@ -136,9 +136,9 @@ alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
     } else {
       beta_vec <- beta_vec + direction
     }
-
+    
   }  ## end NR loop
-
+  
   runtime   <- proc.time() - runtime
   beta_list <- matrix(beta_vec, ncol = d)
   list(runtime = runtime, iters = max_iter, objective = obj_val,
