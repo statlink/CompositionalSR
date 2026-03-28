@@ -9,7 +9,7 @@ ICE plot for the \eqn{\alpha}-regression.
 }
 
 \usage{
-ice.areg(be, x, ind = 1, frac = 0.25)
+ice.areg(be, x, ind = 1, frac = 0.25, pos = 0.5)
 }
 
 \arguments{
@@ -24,6 +24,9 @@ Which variable to select?.
 }
 \item{frac}{
 Fraction of observations to use. The default value is 0.25.
+}
+\item{pos}{
+This is a number between 0 and 1 and is used to place the legend in the appropriate place.
 }
 }
 
@@ -66,7 +69,7 @@ data(fadn)
 y <- fadn[, 3:7]
 x <- fadn[, 8]
 mod <- alfa.reg(y, x, 0.2)
-ice <- ice.areg(y, x, a = 0.2, ind = 1)
+ice <- ice.areg(mod$be, x, ind = 1)
 }
 
 

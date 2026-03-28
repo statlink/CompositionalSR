@@ -1,4 +1,4 @@
-ice.areg <- function(be, x, ind = 1, frac = 0.2, pos = 0.5) {
+ice.areg <- function(be, x, ind = 1, frac = 0.2) {
 
   dm <- dim(y)
   n <- dm[1]  ;  d <- dm[2]
@@ -38,7 +38,7 @@ ice.areg <- function(be, x, ind = 1, frac = 0.2, pos = 0.5) {
   namy <- paste("Y", 1:d, sep = "")
   if ( is.null(namy) )  namy <- paste("Comp. ", 1:d, sep = "")
 
-  legend( x = quantile(x[, ind], pos), y = max(est), legend = namy,
+  legend( x = quantile(x[, ind], 0.5), y = max(est), legend = namy,
           xpd = TRUE, bty = "n", title = "Components", col = 1:d,
           lwd = rep(2, d), lty = rep(1, d), text.col = 1:d )
 
