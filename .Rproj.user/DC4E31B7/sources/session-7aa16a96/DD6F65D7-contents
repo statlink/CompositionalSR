@@ -9,40 +9,21 @@ ICE plot for the \eqn{\alpha}-regression.
 }
 
 \usage{
-ice.areg(y, x, a, ind = 1, frac = 0.2)
+ice.areg(be, x, ind = 1, frac = 0.25)
 }
 
 \arguments{
-\item{y}{
-A numerical vector with the response values.
+\item{be}{
+A numerical matrix with the estimated \eqn{\alpha}-regression coefficients.
 }
 \item{x}{
 A numerical matrix with the predictor variables.
-}
-\item{a}{
-The value \eqn{\alpha} to consider.
-}
-\item{k}{
-The number of nearest neighbours to consider.
-}
-\item{apostasi}{
-The type of distance to use, either "euclidean" or "manhattan".
-}
-\item{rann}{
-If you have large scale datasets and want a faster k-NN search, you can use kd-trees implemented in the
-R package "Rnanoflann". In this case you must set this argument equal to TRUE.
-Note however, that in this case, the only available distance is by default "euclidean".
 }
 \item{ind}{
 Which variable to select?.
 }
 \item{frac}{
-Fraction of observations to use. The default value is 0.1.
-}
-\item{qpos}{
-A number between 0.8 and 1. This is used to place the legend of the figure better.
-You can play with it. In the worst case scenario the code is open and you
-tweak this argument as you prefer.
+Fraction of observations to use. The default value is 0.25.
 }
 }
 
@@ -76,14 +57,16 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 %}
 
 \seealso{
-\code{\link{ice.akernreg}, \link{ice.pprcomp}
+\code{\link{areg}, \link{cv.alfareg}
 }
 }
 
 \examples{
-y <- as.matrix( iris[, 2:4] )
-x <- iris[, 1]
-ice <- ice.areg(y, x, a = 0.6, ind = 1)
+data(fadn)
+y <- fadn[, 3:7]
+x <- fadn[, 8]
+mod <- alfa.reg(y, x, 0.2)
+ice <- ice.areg(y, x, a = 0.2, ind = 1)
 }
 
 
