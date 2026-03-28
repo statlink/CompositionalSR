@@ -64,7 +64,7 @@ The covariance matrix of the beta coefficients, or NULL if it is singular.
 }
 
 \references{
-Tsagris M. (2025). The \eqn{\alpha}--regression for compositional data: a unified framework for standard, spatially-lagged, spatial autoregressive and geographically-weighted regression models.
+Tsagris M. and Pantazis Y. (2026). The \eqn{\alpha}--regression for compositional data: a unified framework for standard, spatially-lagged, spatial autoregressive and geographically-weighted regression models.
 https://arxiv.org/pdf/2510.12663
 
 Tsagris M. (2015). Regression analysis with compositional data containing zero values.

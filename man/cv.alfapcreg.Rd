@@ -1,27 +1,28 @@
 \name{K-fold cross-validation for the alpha-regression}
-\alias{cv.alfareg}
+\alias{cv.alfapcreg}
 \title{
-K-fold cross-validation for the \eqn{\alpha}-regression
+K-fold cross-validtion the \eqn{\alpha}-regression
 }
 
 \description{
-K-fold cross-validation for the \eqn{\alpha}-regression.
+K-fold cross-validtion the \eqn{\alpha}-regression.
 }
 
 \usage{
-cv.alfareg(y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10,
-folds = NULL, nc = 1, seed = NULL)
+cv.alfapcreg(y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10, folds = NULL, seed = NULL)
 }
 
 \arguments{
 \item{y}{
-A matrix with compositional data. zero values are allowed.
+A matrix with compositional response data. Zero values are allowed.
 }
 \item{x}{
-A matrix with the continuous predictor variables or a data frame including categorical predictor variables.
+A matrix with the compositional predictor variables. Zero values are allowed.
 }
 \item{a}{
-The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0. If \eqn{\alpha=0} the isometric log-ratio transformation is applied.
+A numerical vector with the values of the power transformation, it has to be between -1 and 1.
+If zero values are present it has to be greater than 0. If \eqn{\alpha=0} the isometric
+log-ratio transformation is applied.
 }
 \item{nfolds}{
 The number of folds to split the data.
@@ -29,16 +30,15 @@ The number of folds to split the data.
 \item{folds}{
 If you have the list with the folds supply it here. You can also leave it NULL and it will create folds.
 }
-\item{nc}{
-The number of cores to use. IF you have a multicore computer it is advisable to use more than 1. It makes the procedure faster. It is advisable to use it if you have many observations and or many variables, otherwise it will slow down th process.
-}
 \item{seed}{
 You can specify your own seed number here or leave it NULL.
 }
 }
 
 \details{
-Tuning the value of \eqn{\alpha} in the \eqn{\alpha}-regression takes place using K-fold cross-validation.
+Tuning the value of \eqn{\alpha} and k, the number of principal components in the
+\eqn{\alpha}-regression with compositional predictors takes place using the
+classical K-fold cross-validation.
 }
 
 \value{
@@ -47,10 +47,16 @@ A list including:
 The runtime required by the cross-validation.
 }
 \item{perf}{
-A vector with the average Kullback-Leibler divergence, for every value of \eqn{\alpha}.
+A matrix with the average Kullback-Leibler divergence, for every value of \eqn{\alpha} and k.
 }
-\item{opt}{
-A vector with the minimum Kullback-Leibler divergence and the optimal value of \eqn{\alpha}.
+\item{kl}{
+The minimum average value of the Kullback-Leibler divergence.
+}
+\item{opt_a}{
+The optimal value of \eqn{\alpha}.
+}
+\item{opt_k}{
+The optimal value of k, the number of principal components.
 }
 }
 
@@ -78,14 +84,15 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 %}
 
 \seealso{
-\code{ \link{alfa.reg}, \link{cv.alfaslx}, \link{cv.gwar}, \link{me.ar}
+\code{ \link{alfa.pcreg}, \link{cv.alfareg}
 }
 }
 
 \examples{
 data(fadn)
 y <- fadn[, 3:7]
-x <- fadn[, 8]
-mod <- cv.alfareg(y, x, a = c(0.5, 1))
+x <- fadn[, 8:11]
+x <- x / rowSums(x)
+mod <- alfa.pcreg(y, x, a = c(0.5, 1))
 }
 
