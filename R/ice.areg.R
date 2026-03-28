@@ -1,6 +1,6 @@
 ice.areg <- function(be, x, ind = 1, frac = 0.2, pos = 0.5) {
 
-  dm <- dim(y)
+  dm <- dim(be)[2] + 1
   n <- dm[1]  ;  d <- dm[2]
   nu <- ceiling(frac * n)
   x <- cbind(1, x)

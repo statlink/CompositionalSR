@@ -1,6 +1,6 @@
 #useDynLib(Compositional, .registration = TRUE)
 
-importFrom("Compositional", alfa, comp.reg, helm, makefolds)
+importFrom("Compositional", alfa, comp.reg, helm)
 importFrom("Rfast", rowsums, rowOrder, colmeans, rowMins, Dist, dista, eachcol.apply)
 importFrom("stats", model.matrix, as.formula, coef, optimize, optim, quantile, prcomp)
 importFrom("graphics", legend, lines, mtext)
