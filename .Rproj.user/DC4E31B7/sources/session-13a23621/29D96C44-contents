@@ -9,7 +9,7 @@ K-fold cross-validation for the \eqn{\alpha}-regression.
 }
 
 \usage{
-cv.alfareg(y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10,
+cv.alfareg(y, x, a = seq(0.1, 1, by = 0.1), con = TRUE, nfolds = 10,
 folds = NULL, nc = 1, seed = NULL)
 }
 
@@ -22,6 +22,9 @@ A matrix with the continuous predictor variables or a data frame including categ
 }
 \item{a}{
 The value of the power transformation, it has to be between -1 and 1. If zero values are present it has to be greater than 0. If \eqn{\alpha=0} the isometric log-ratio transformation is applied.
+}
+\item{con}{
+Do you want the constant term to appear? Default is TRUE.
 }
 \item{nfolds}{
 The number of folds to split the data.

@@ -9,7 +9,7 @@ Compositional regression with compositional predictors using the \eqn{\alpha}-tr
 }
 
 \usage{
-alfa.pcreg(y, x, a, k, xnew = NULL, yb = NULL)
+alfa.pcreg(y, x, a, k, con = TRUE, xnew = NULL, yb = NULL)
 }
 
 \arguments{
@@ -26,6 +26,9 @@ solution exists in a closed form, since it the classical mutivariate regression.
 }
 \item{k}{
 How many principal components to compute?
+}
+\item{con}{
+Do you want the constant term to appear? Default is TRUE.
 }
 \item{xnew}{
 If you have new data use it, otherwise leave it NULL.

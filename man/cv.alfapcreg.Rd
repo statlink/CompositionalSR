@@ -9,7 +9,7 @@ K-fold cross-validation the \eqn{\alpha}-regression with compositional predictor
 }
 
 \usage{
-cv.alfapcreg(y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10, folds = NULL, seed = NULL)
+cv.alfapcreg(y, x, a = seq(0.1, 1, by = 0.1), con = TRUE, nfolds = 10, folds = NULL, seed = NULL)
 }
 
 \arguments{
@@ -23,6 +23,9 @@ A matrix with the compositional predictor variables. Zero values are allowed.
 A numerical vector with the values of the power transformation, it has to be between -1 and 1.
 If zero values are present it has to be greater than 0. If \eqn{\alpha=0} the isometric
 log-ratio transformation is applied.
+}
+\item{con}{
+Do you want the constant term to appear? Default is TRUE.
 }
 \item{nfolds}{
 The number of folds to split the data.
