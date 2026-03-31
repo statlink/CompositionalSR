@@ -1,4 +1,4 @@
-alfa.reg3 <- function(y, x, a = c(-1, 1), con = TRUE, xnew = NULL) {
+alfa.reg3 <- function(y, x, a = c(-1, 1), xnew = NULL) {
 
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
@@ -23,7 +23,6 @@ alfa.reg3 <- function(y, x, a = c(-1, 1), con = TRUE, xnew = NULL) {
   }
 
   x <- model.matrix(y ~., data.frame(x) )
-  if ( !con )  x <- x[, -1, drop = FALSE]
   D <- dim(y)[2]
   d <- D - 1  ## dimensionality of the simplex
   ha <- t( Compositional::helm(D) )
@@ -33,9 +32,7 @@ alfa.reg3 <- function(y, x, a = c(-1, 1), con = TRUE, xnew = NULL) {
   runtime <- proc.time()
   a <- optimize(reg2, a, y = y, ha = ha, x = x, d = d, D = D)$minimum
   runtime <- proc.time() - runtime
-  if ( con )  {
-    res <- Compositional::alfa.reg(y = y, x = x[, -1], a = a, con = TRUE, xnew = xnew)
-  } else  res <- Compositional::alfa.reg(y = y, x = x, a = a, con = FALSE, xnew = xnew)
+  res <- Compositional::alfa.reg(y = y, x = x[, -1], a = a, xnew = xnew)
   res$runtime <- res$runtime + runtime
   res$alfa <- a
   res

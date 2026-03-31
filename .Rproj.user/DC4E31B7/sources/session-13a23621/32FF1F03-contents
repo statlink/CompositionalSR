@@ -49,7 +49,7 @@ areg <- function(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL) {
     ya <- Compositional::alfa(y, a)$aff
   } else  ya <- yb
   x <- model.matrix(ya ~., data.frame(x) )
-  if ( !con )  x <- x[, -1, drop = FALSE]
+  if ( !con )  x <- x[, -1]
   ax <- a * x
 
   D <- dim(y)[2]

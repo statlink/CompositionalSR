@@ -14,8 +14,8 @@ Regression with compositional data using the \eqn{\alpha}-transformation.
 \usage{
 areg(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL)
 alfa.reg(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL)
-alfa.reg2(y, x, a, con = TRUE, xnew = NULL, ncores = 1)
-alfa.reg3(y, x, a = c(-1, 1), con = TRUE, xnew = NULL)
+alfa.reg2(y, x, a, xnew = NULL, ncores = 1)
+alfa.reg3(y, x, a = c(-1, 1), xnew = NULL)
 }
 
 \arguments{

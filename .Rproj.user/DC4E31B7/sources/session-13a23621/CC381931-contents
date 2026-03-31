@@ -6,7 +6,7 @@
 #### Regression analysis with compositional data containing zero values
 #### Chilean Journal of Statistics, 6(2): 47-57
 ################################
-areg <- function(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL) {
+alfa.reg <- function(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL) {
 
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
@@ -17,39 +17,13 @@ areg <- function(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL) {
     as.vector(ya - ma)
   }
 
-  ## Analytical Jacobian of reg()
-  jac <- function(para, ya, ax, a, ha, d, D) {
-    n <- nrow(ax)
-    p <- ncol(ax)
-    beta_idx  <- lapply(1:d, function(k) ((k - 1L) * p + 1L):(k * p))
-    resid_idx <- lapply(1:d, function(j) ((j - 1L) * n + 1L):(j * n))
-
-    be <- matrix(para, ncol = d)
-    zz <- cbind(1, exp(ax %*% be))
-    za <- zz / rowSums(zz)    # n x D
-    zh <- za %*% ha           # n x d
-
-    J <- matrix(0, nrow = n * d, ncol = d * p)
-    Da <- D / a
-
-    for (j in 1:d) {
-      for (k in 1:d) {
-        ## scalar weight per observation
-        w <- Da * za[, k + 1L] * (ha[k + 1L, j] - zh[, j])
-        ## block: n x p  (row-wise scaling of ax by w)
-        J[ resid_idx[[j]], beta_idx[[k]] ] <- -w * ax
-      }
-    }
-    J
-  }
-
   runtime <- proc.time()
 
   if ( is.null(yb) ) {
     ya <- Compositional::alfa(y, a)$aff
   } else  ya <- yb
   x <- model.matrix(ya ~., data.frame(x) )
-  if ( !con )  x <- x[, -1, drop = FALSE]
+  if ( !con )  x <- x[, -1]
   ax <- a * x
 
   D <- dim(y)[2]
@@ -60,11 +34,11 @@ areg <- function(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL) {
     be <- mod$be
 
   } else {
-    ha  <- t( Compositional::helm(D) )
+    ha <- t( Compositional::helm(D) )
     ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
-                                ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
+
     })
     be <- matrix(mod$par, ncol = d)
 
@@ -77,7 +51,6 @@ areg <- function(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL) {
     xnew <- as.matrix(xnew)
     if ( dim(xnew)[1] == 1 )  xnew <- t(xnew)
     xnew <- model.matrix(~., data.frame(xnew) )
-    if ( !con )  xnew <- xnew[, -1, drop = FALSE]
     est <- cbind( 1, exp(xnew %*% be) )
     est <- est/Rfast::rowsums(est)
   }
@@ -114,3 +87,5 @@ areg <- function(y, x, a, con = TRUE, covb = FALSE, xnew = NULL, yb = NULL) {
   ma <- ( D / a * za - 1/a ) %*% ha
   sum( (ya - ma)^2 )
 }
+
+
