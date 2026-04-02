@@ -1,4 +1,4 @@
-cv.alfapcreg <- function( y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10, folds = NULL, seed = NULL ) {
+cv.alfapcreg <- function( y, x, a = seq(0.1, 1, by = 0.1), k = dim(x)[2] - 2, nfolds = 10, folds = NULL, seed = NULL ) {
   if ( min(y) == 0 )  a <- a[ a > 0 ]
   la <- length(a)
   n <- dim(y)[1]
@@ -7,11 +7,10 @@ cv.alfapcreg <- function( y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10, folds = 
                                                            stratified = FALSE, seed = seed)
   nfolds <- length(folds)
   apa <- proc.time()
-  p <- dim(x)[2] - 1
-  kula <- matrix(nrow = nfolds, ncol = p)
-  akula <- matrix(nrow = la, ncol = p)
+  kula <- matrix(nrow = nfolds, ncol = k)
+  akula <- matrix(nrow = la, ncol = k)
   rownames(akula) <- paste("alpha=", a, sep = "")
-  colnames(akula) <- paste("PC", 1:p, sep = "")
+  colnames(akula) <- paste("PC", 1:k, sep = "")
 
   for ( j in 1:la ) {
     ytr <- Compositional::alfa(y, a[j])$aff
@@ -22,13 +21,13 @@ cv.alfapcreg <- function( y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10, folds = 
       yb <- ytr[ -folds[[ i ]], ]
       pca <- prcomp(xtr[ -folds[[ i ]], ], center = FALSE, scale. = FALSE)
       ytest <- y[ folds[[ i ]], ]
-      for ( k in 1:p ) {
-        xtrain <- pca$x[, 1:k]
-        xtest <- xtr[ folds[[ i ]], , drop = FALSE] %*% pca$rotation[, 1:k]
+      for ( vim in 1:k ) {
+        xtrain <- pca$x[, 1:vim]
+        xtest <- xtr[ folds[[ i ]], , drop = FALSE] %*% pca$rotation[, 1:vim]
         yest <- CompositionalSR::areg(ytrain, xtrain, a[j], xnew = xtest, yb = yb)$est
         kl <- ytest * log(ytest / yest)
         kl[ is.infinite(kl) ] <- NA
-        kula[i, k] <- sum(kl, na.rm = TRUE) / dim(yest)[1]
+        kula[i, vim] <- sum(kl, na.rm = TRUE) / dim(yest)[1]
       }
     }
     akula[j, ] <- Rfast::colmeans(kula)
