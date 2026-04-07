@@ -51,7 +51,7 @@ A list with the fitted values, for each combination of \eqn{\alpha} and h.
 }
 
 \references{
-Tsagris M. and Pantazis Y. (2026). The \eqn{\alpha}--regression for compositional data: a unified framework for standard, spatially-lagged, spatial autoregressive and geographically-weighted regression models.
+Tsagris M. and Pantazis Y. (2026). The \eqn{\alpha}--regression for compositional data: a unified framework for standard, temporal and spatial regression models including compositional predictors.
 https://arxiv.org/pdf/2510.12663
 
 Tsagris M. (2015). Regression analysis with compositional data containing zero values.
