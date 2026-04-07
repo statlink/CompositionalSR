@@ -1,4 +1,4 @@
-alfa.esf <- function(y, x, a, coords, xnew = NULL, coordsnew, yb = NULL) {
+alfa.esf <- function(y, x, a, coords, model = "exp", xnew = NULL, coordsnew, yb = NULL) {
 
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
@@ -18,7 +18,7 @@ alfa.esf <- function(y, x, a, coords, xnew = NULL, coordsnew, yb = NULL) {
   } else  ya <- yb
   x <- model.matrix( ya ~., data.frame(x) )
 
-  esf <- spmoran::meigen_f(coords)
+  esf <- spmoran::meigen_f(coords, model = model)
   X <- esf$sf
 
   if ( a <= 1e-5 ) {

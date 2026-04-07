@@ -115,6 +115,6 @@ data(fadn)
 coords <- fadn[1:50, 1:2]
 y <- fadn[1:50, 3:7]
 x <- fadn[1:50, 8]
-mod <- alfa.esf(y, x, a = 0.1, coords = coords)
+mod <- alfa.esf(y, x, a = 1, coords = coords)
 }
 
