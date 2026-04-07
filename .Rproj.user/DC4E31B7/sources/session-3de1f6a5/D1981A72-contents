@@ -10,7 +10,7 @@ importFrom("sf", st_as_sf)
 importFrom("blockCV", cv_spatial)
 importFrom("gslnls", gsl_nls, gsl_nls_control)
 importFrom("utils", flush.console)
-importFrom("spmoran", meigen_f, meigen0)
+importFrom("spmoran", meigen_f)
 
 import("doParallel")
 import("parallel")

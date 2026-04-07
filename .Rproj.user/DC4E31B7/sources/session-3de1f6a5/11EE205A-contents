@@ -1,15 +1,15 @@
-\name{The alpha-SAR model}
-\alias{alfa.sar}
+\name{The alpha-ESF model}
+\alias{alfa.esf}
 \title{
-The \eqn{\alpha}-SAR model
+The \eqn{\alpha}-ESF model
 }
 
 \description{
-The \eqn{\alpha}-SAR model.
+The \eqn{\alpha}-ESF model.
 }
 
 \usage{
-alfa.sar(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsnew, yb = NULL)
+alfa.esf(y, x, a, coords, xnew = NULL, coordsnew, yb = NULL)
 }
 
 \arguments{
@@ -25,12 +25,6 @@ The value of the power transformation, it has to be between -1 and 1. If zero va
 \item{coords}{
 A matrix with the coordinates of the locations. The first column is the latitude and the second is the longitude.
 }
-\item{k}{
-The number of nearest neighbours to consider for the contiguity matrix.
-}
-\item{covb}{
-Do you want the covariance matrix of the spatial autoregressive parameter and the regression coefficients to be returned? If TRUE, this will slow down the process, as it is computed numerically.
-}
 \item{xnew}{
 If you have new data use it, otherwise leave it NULL.
 }
@@ -43,8 +37,9 @@ If you have already transformed the data using the \eqn{\alpha}-transformation w
 }
 
 \details{
-The \eqn{\alpha}-transformation is applied to the compositional data first and the spatial autocorrelation (SAR) model is applied. The function performs a grid search searching for the range
-of good values of \eqn{\rho} and then uses that as starting value.
+The \eqn{\alpha}-transformation is applied to the compositional data first. Then the eigenvectors of the
+kernelized distance matrix are computed and the appropriate number is selected to be included as predictors.
+the selection takes place using the \eqn{\gamma}-OMP algorithm (Tsagris et al., 2022).
 }
 
 \value{
@@ -55,8 +50,14 @@ The time required by the regression.
 \item{be}{
 The beta coefficients.
 }
-\item{covbe}{
-The covariance matrix if covb was set to TRUE, otherwise NULL.
+\item{gama}{
+The gamma coefficients of the eigenvectors.
+}
+\item{ESF}{
+A vector with the indices of the eigenvectors used.
+}
+\item{X.esf}{
+A matrix with the values of the eigenvectors used.
 }
 \item{dev}{
 The sum of the squared residuals, as produced by the function \bold{minpack.lm::nls.lm()}.
@@ -78,6 +79,10 @@ Tsagris M.T., Preston S. and Wood A.T.A. (2011). A data-based power transformati
 compositional data.
 In Proceedings of the 4th Compositional Data Analysis Workshop, Girona, Spain.
 https://arxiv.org/pdf/1106.1451.pdf
+
+Tsagris M., Papadovasilakis Z., Lakiotaki K. and Tsamardinos I. (2022).
+The \eqn{\gamma}-OMP Algorithm for Feature Selection With Application to Gene Expression Data.
+IEEE/ACM Transactions on Computational Biology and Bioinformatics, 19(2), 1214--1224.
 }
 
 \author{
@@ -91,7 +96,7 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 %}
 
 \seealso{
-\code{\link{cv.alfaslx}, \link{me.aslx}, \link{gwar}, \link{alfa.reg}
+\code{\link{cv.alfaesf}, \link{alfa.sar}, \link{alfa.slx}, \link{alfa.reg}
 }
 }
 
@@ -100,5 +105,6 @@ data(fadn)
 coords <- fadn[1:50, 1:2]
 y <- fadn[1:50, 3:7]
 x <- fadn[1:50, 8]
+mod <- alfa.esf(y, x, a = 1, coords = coords)
 }
 
