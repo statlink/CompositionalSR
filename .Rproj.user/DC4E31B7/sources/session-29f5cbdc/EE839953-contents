@@ -1,20 +1,23 @@
-\name{ICE plot for the alpha-regression}
-\alias{ice.areg}
+\name{ICE plot for the alpha-ESF model}
+\alias{ice.aesf}
 \title{
-ICE plot for the \eqn{\alpha}-regression
+ICE plot for the \eqn{\alpha}-ESF model
 }
 
 \description{
-ICE plot for the \eqn{\alpha}-regression.
+ICE plot for the \eqn{\alpha}-ESF model.
 }
 
 \usage{
-ice.areg(be, x, ind = 1, frac = 0.25, pos = 0.5)
+ice.aesf(be, gama, x, X.esf, ind = 1, frac = 0.25, pos = 0.5)
 }
 
 \arguments{
 \item{be}{
-A numerical matrix with the estimated \eqn{\alpha}-regression coefficients.
+A numerical matrix with the estimated \eqn{\beta} coefficients of the \eqn{\alpha}-ESF model.
+}
+\item{gama}{
+A numerical matrix with the estimated \eqn{\gamma} coefficients of the \eqn{\alpha}-ESF model.
 }
 \item{x}{
 A numerical matrix with the predictor variables.
@@ -69,10 +72,11 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 
 \examples{
 data(fadn)
+coords <- fadn[, 1:2]
 y <- fadn[, 3:7]
 x <- fadn[, 8, drop = FALSE]
-mod <- alfa.reg(y, x, 0.2)
-ice <- ice.areg(mod$be, x, ind = 1)
+mod <- alfa.esf(y, x, a = 0.1, coords = coords)
+ice <- ice.aesf(mod$be, mod$gama, x, mod$X.esf, ind = 1)
 }
 
 
