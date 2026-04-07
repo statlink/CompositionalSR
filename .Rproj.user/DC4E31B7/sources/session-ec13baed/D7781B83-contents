@@ -97,8 +97,8 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 \examples{
 data(fadn)
 coords <- fadn[1:50, 1:2]
-y <- fadn[1:50, 3:7]
-x <- fadn[1:50, 8]
-mod <- cv.alfaesf(y, x, a = c(0.1, 0.5), coords)
+y <- fadn[, 3:7]
+x <- fadn[, 8]
+mod <- cv.alfaesf(y, x, a = c(0.1, 0.5), coords, nfolds = 5)
 }
 

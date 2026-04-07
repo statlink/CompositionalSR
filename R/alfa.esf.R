@@ -77,6 +77,7 @@ alfa.esf <- function(y, x, a, coords, model = "exp", xnew = NULL, coordsnew, yb 
       rownames(be) <- c("constant", paste("X", 1:p, sep = "") )
     } else  rownames(be) <- c("constant", colnames(x)[-1] )
     gama <- NULL
+    X.esf <- NULL
   }
 
   list(runtime = runtime, be = be, gama = gama, ESF = sela, X.esf = X.esf, dev = mod$deviance, est = est)
