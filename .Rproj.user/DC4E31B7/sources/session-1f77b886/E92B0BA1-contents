@@ -1,5 +1,0 @@
-me.aesf <- function(be, gama, mu, x, X.esf) {
-  be <- rbind(be, gama)
-  x <- cbind(x, X.esf)
-  CompositionalSR::me.ar(be, mu, x)
-}
