@@ -22,6 +22,9 @@ A numerical matrix with the estimated \eqn{\gamma} coefficients of the \eqn{\alp
 \item{x}{
 A numerical matrix with the predictor variables.
 }
+\item{X.esf}{
+A matrix with the values of the eigenvectors computed.
+}
 \item{ind}{
 Which variable to select?.
 }
