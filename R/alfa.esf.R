@@ -108,10 +108,10 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
   }
 
   if ( covb ) {
-    res <- optim( as.vector(be), .regar, ya = ya, ax = ax, a = a, ha = ha, d = d,
+    res <- optim( as.vector( rbind(be, gama) ), .regar, ya = ya, ax = aX, a = a, ha = ha, d = d,
                   D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 1000) )
     covbe <- solve(res$hessian)
-    a2 <- colnames(x)
+    a2 <- c( colnames(x), colnames(X.esf) )
     a1 <- colnames(be)
     nam <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
     colnames(covbe) <- rownames(covbe) <- nam
