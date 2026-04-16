@@ -41,26 +41,7 @@ the fitted compositional values. The functions are highly optimized.
 }
 
 \value{
-For the alfa.reg() function a list including:
-\item{runtime}{
-The time required by the regression.
-}
-\item{be}{
-The beta coefficients.
-}
-\item{covbe}{
-The covariance matrix if covb was set to TRUE, otherwise NULL.
-}
-\item{dev}{
-The sum of the squared residuals, as produced by the function \bold{minpack.lm::nls.lm()}.
-}
-\item{est}{
-The fitted values for xnew if xnew is not NULL.
-}
-
-For the alfa.reg2() function a list with the time required by all regressions and the regression coefficients and the fitted values for each value of \eqn{\alpha}.
-
-For the alfa.reg3() function a list with the previous elements plus an output "alfa", the optimal value of \eqn{\alpha}.
+The permutation based p-value.
 }
 
 \references{
