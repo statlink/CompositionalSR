@@ -129,14 +129,13 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
    KLD <- kld
    p <- dim(X)[2]
    klc <- numeric(p)
-   ya <- Compositional::alfa(y, a)$aff
    ind <- 1:p
    for ( j in ind ) {
      klc[j] <- mean( Rfast::eachcol.apply(ya, X[, j])^2 )
    }
    sel <- which.max(klc)
    z <- cbind(x, X[, sel])
-   mod <- CompositionalSR::areg(y, z, a, xnew = z)
+   mod <- CompositionalSR::areg(y, z, a, xnew = z, yb = ya)
    est <- mod$est
    kl <- y * log( y / est )
    kl[ is.infinite(kl) ] <- NA
@@ -152,7 +151,7 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
      }
      sel <- c(sel, which.max(klc) )
      z <- cbind(x, X[, sel])
-     mod <- CompositionalSR::areg(y, z, a, xnew = z)
+     mod <- CompositionalSR::areg(y, z, a, xnew = z, yb = ya)
      est <- mod$est
      kl <- y * log( y / est )
      kl[ is.infinite(kl) ] <- NA
