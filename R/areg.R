@@ -89,7 +89,7 @@ areg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
 
   if ( covb ) {
     res <- optim( as.vector(be), .regar, ya = ya, ax = ax, a = a, ha = ha, d = d,
-                  D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 1000) )
+                  D = D, hessian = TRUE, control = list(maxit = 1000) )
     covbe <- solve(res$hessian)
     a2 <- colnames(x)
     a1 <- colnames(be)
