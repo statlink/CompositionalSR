@@ -23,5 +23,5 @@ alfa.wald <- function(y, x, a, R = 299, ncores) {
   })
   parallel::stopCluster(cl)
   statb <- unlist(statb)
-  ( sum(statb >= stat) + 1 ) / R
+  ( sum(statb >= stat) + 1 ) / (R + 1)
 }
