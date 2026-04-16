@@ -1,6 +1,7 @@
-alfa.wald <- function(y, x, a, R = 499, ncores) {
+alfa.wald <- function(y, x, a, R = 299, ncores) {
 
 cl <- parallel::makeCluster(ncores)
+on.exit(parallel::stopCluster(cl), add = TRUE)
 n <- dim(x)[1]
 yb <- Compositional::alfa(y, a)$aff
 mod <- CompositionalSR::areg(y, x, a, covb = TRUE, yb = yb)
@@ -12,7 +13,7 @@ parallel::clusterExport(cl, c("x", "y", "yb", "a", "ep", "n"), envir = environme
   statb <- parallel::parLapply(cl, 1:R, function(j) {
   ind <- sample(n, n, replace = TRUE)
   modb <- CompositionalSR::areg(y, x[ind, ], a = a, covb = TRUE, yb = yb)
-  s <- mod$covbe[-ep, -ep]
+  s <- modb$covbe[-ep, -ep]
   b <- as.vector(modb$be[-1, ])
   as.numeric( b %*% solve(s, b) )
 })

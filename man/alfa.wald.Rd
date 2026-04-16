@@ -9,7 +9,7 @@ Wald test for the \eqn{\alpha}-regression.
 }
 
 \usage{
-alfa.wald(y, x, a, R = 499, ncores)
+alfa.wald(y, x, a, R = 299, ncores)
 }
 
 \arguments{
@@ -81,6 +81,6 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 data(fadn)
 y <- fadn[, 3:7]
 x <- fadn[, 8]
-mod <- alfa.reg(y, x, 0.2)
+mod <- alfa.reg(y, x, 1)
 }
 
