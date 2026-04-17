@@ -14,7 +14,7 @@ alfa.wald <- function(y, x, a, R = 299, ncores) {
     library(CompositionalSR)
   })
   parallel::clusterExport(cl, varlist = c("x", "y", "yb", "a", "ep", "n"), envir = environment())
-  statb <- parallel::parLapply(cl, 1:R, function(j) {
+  statb <- parallel::parLapplyLB(cl, 1:R, function(j) {
     tryCatch({
       ind <- sample(n, n)
       modb <- CompositionalSR::areg(y, x, a = a, covb = TRUE, yb = yb[ind, ])
@@ -27,5 +27,5 @@ alfa.wald <- function(y, x, a, R = 299, ncores) {
   })
   parallel::stopCluster(cl)
   statb <- unlist(statb)
-  ( sum(statb >= stat) + 1 ) / (R + 1)
+  ( sum(statb >= stat, na.rm = TRUE) + 1 ) / (R - sum( is.na(statb) ) + 1)
 }
