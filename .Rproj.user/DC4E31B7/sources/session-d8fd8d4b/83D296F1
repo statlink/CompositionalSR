@@ -3,7 +3,7 @@
     "path": "~/GitHub/CompositionalSR/R/alfa.wald.R",
     "project_path": "R/alfa.wald.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "2000133676",
     "contents": "",
     "dirty": false,
     "created": 1776417506715.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "33,10",
-        "scrollLine": "15"
+        "cursorPosition": "17,40",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1776509406,
+    "lastKnownWriteTime": 1776509464,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1776509406789,
+    "last_content_update": 1776509464830,
     "read_only": false,
     "read_only_alternatives": []
 }
