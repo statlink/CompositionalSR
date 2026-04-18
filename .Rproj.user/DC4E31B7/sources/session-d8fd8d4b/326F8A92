@@ -1,27 +1,27 @@
 {
-    "id": "83D296F1",
-    "path": "~/GitHub/CompositionalSR/R/alfa.wald.R",
-    "project_path": "R/alfa.wald.R",
-    "type": "r_source",
+    "id": "326F8A92",
+    "path": "~/GitHub/CompositionalSR/man/alfa.wald.Rd",
+    "project_path": "man/alfa.wald.Rd",
+    "type": "r_doc",
     "hash": "0",
     "contents": "",
     "dirty": false,
-    "created": 1776417506715.0,
+    "created": 1776509222304.0,
     "source_on_save": false,
-    "relative_order": 1,
+    "relative_order": 2,
     "properties": {
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "41,51",
-        "scrollLine": "24"
+        "cursorPosition": "28,46",
+        "scrollLine": "1"
     },
     "folds": "",
-    "lastKnownWriteTime": 1776461291,
+    "lastKnownWriteTime": 1776509381,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1776461291376,
+    "last_content_update": 1776509381249,
     "read_only": false,
     "read_only_alternatives": []
 }
