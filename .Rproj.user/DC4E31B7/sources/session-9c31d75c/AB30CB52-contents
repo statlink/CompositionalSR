@@ -1,0 +1,66 @@
+library(Rfast)
+library(Compositional)
+library(CompositionalSR)
+source("sandwich.R")
+
+rdir <- function(mu) {
+  d <- dim(mu)[2]
+  n <- dim(mu)[1]
+  y <- mu
+  for ( i in 1:d )  y[, i] <- rgamma(n, mu[, i], 1)
+  y / Rfast::rowsums(y)
+}  
+
+
+R <- 500
+p <- numeric(R)
+n <- c(100, 200, 500)
+p <- c(1, 2, 3, 4)
+pval <- matrix(nrow = 4, ncol = 4)
+
+for ( i in 1:4 ) {
+  for (j in 3:4) {
+    pv <- numeric(R)
+    for (k in 1:R) {
+      y <- rdiri(n[i], runif(5, 5, 10))
+      x <- matrnorm(n[i], p[j])
+      pv[k] <- alfa.wald(y, x, a = 1, R = 299, ncores = 10)
+    }
+    pval[i, j] <- mean(pv <= 0.05)
+    save.image("asize.RData")
+  }
+}
+
+
+for ( i in 1:4 ) {
+  for (j in 1:5) {
+    pv <- numeric(R)
+    for (k in 1:R) {
+      x <- matrnorm(n[i], p[j])
+      be <- matrnorm(p[j] + 1, 4)
+      mu <- exp(cbind(1, x) %*% be) 
+      y <- rdir(mu)
+      pv[k] <- alfa.wald(y, x, a = 1, R = 299, ncores = 10)
+    }
+    pval[i, j] <- mean(pv <= 0.05)
+    save.image("power.RData")
+  }
+}
+
+
+for ( i in 1:4 ) {
+  for (j in 1:5) {
+    pv <- numeric(R)
+    B <- matrnorm(5, 4)
+    for (k in 1:R) {
+      x <- matrnorm(n[i], 4)
+      mu <- exp( cbind(1, x) %*% B) 
+      mu <- mu / rowsums(mu)
+      x1 <- matrnorm(n[i], 1)
+      y <- rdir(mu)
+      pv[k] <- alfa.wald(y, cbind(x, x1), a = 1, index = 5, R = 299, ncores = 10)
+    }
+    hist(pv)
+    pval[i, j] <- mean(pv <= 0.05)
+  }
+}
