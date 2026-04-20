@@ -33,12 +33,13 @@ alfa.wald <- function(y, x, a, index = "all", R = 299, ncores) {
 
   } else {
     b <- as.vector(mod$be[index + 1, ])
-    colnames(x) <- paste("X", 1:p)
-    ep <- grep(paste("X", index), colnames( mod$covbe) )
-    s <- mod$covbe[-ep, -ep]
+    p <- dim(x)[2]
+    colnames(x) <- paste("X", 1:p, sep = "")
+    ep <- grep(paste("X", index, sep = ""), colnames( mod$covbe) )
+    s <- mod$covbe[ep, ep]
     stat <- as.numeric( b %*% solve(s, b) )
 
-    mod <- CompositionalSR::areg(y, x[, -ind], a, covb = TRUE, yb = ya, xnew = x[, -ind])
+    mod <- CompositionalSR::areg(y, x[, -index], a, covb = TRUE, yb = ya, xnew = x[, -index])
     esta <- Compositional::alfa(mod$est, a)$aff
     res <- ya - esta
 
@@ -54,8 +55,8 @@ alfa.wald <- function(y, x, a, index = "all", R = 299, ncores) {
         resb <- res[ind, ]
         yb <- esta + resb
         modb <- CompositionalSR::areg(y, x, a = a, covb = TRUE, yb = yb)
-        s <- modb$covbe[-ep, -ep]
-        b <- as.vector(modb$be[-1, ])
+        s <- modb$covbe[ep, ep]
+        b <- as.vector(modb$be[index + 1, ])
         list( value = as.numeric(b %*% solve(s, b)), error = NULL )
       }, error = function(e) {
         list( value = NA_, error = conditionMessage(e) )
