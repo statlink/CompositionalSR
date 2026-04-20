@@ -15,11 +15,11 @@ alfa.wald <- function(y, x, a, index = "all", R = 299, ncores) {
       library(Compositional)
       library(CompositionalSR)
     })
-    parallel::clusterExport(cl, varlist = c("x", "y", "yb", "a", "ep", "n"), envir = environment())
+    parallel::clusterExport(cl, varlist = c("x", "y", "ya", "a", "ep", "n"), envir = environment())
     statb <- parallel::parLapplyLB(cl, 1:R, function(j) {
       tryCatch({
         ind <- sample(n, n)
-        modb <- CompositionalSR::areg(y, x, a = a, covb = TRUE, yb = yb[ind, ])
+        modb <- CompositionalSR::areg(y, x, a = a, covb = TRUE, yb = ya[ind, ])
         s <- modb$covbe[-ep, -ep]
         b <- as.vector(modb$be[-1, ])
         list( value = as.numeric(b %*% solve(s, b)), error = NULL )
@@ -47,7 +47,7 @@ alfa.wald <- function(y, x, a, index = "all", R = 299, ncores) {
       library(Compositional)
       library(CompositionalSR)
     })
-    parallel::clusterExport(cl, varlist = c("x", "y", "yb", "a", "res", "ep", "n"), envir = environment())
+    parallel::clusterExport(cl, varlist = c("x", "y", "a", "res", "ep", "n"), envir = environment())
     statb <- parallel::parLapplyLB(cl, 1:R, function(j) {
       tryCatch({
         ind <- sample(n, n)
