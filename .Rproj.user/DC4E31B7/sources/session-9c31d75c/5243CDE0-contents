@@ -48,7 +48,7 @@ alfa.wald <- function(y, x, a, index = "all", R = 299, ncores) {
       library(Compositional)
       library(CompositionalSR)
     })
-    parallel::clusterExport(cl, varlist = c("x", "y", "a", "res", "esta", "ep", "n"), envir = environment())
+    parallel::clusterExport(cl, varlist = c("x", "y", "a", "res", "esta", "index", "ep", "n"), envir = environment())
     statb <- parallel::parLapplyLB(cl, 1:R, function(j) {
       tryCatch({
         ind <- sample(n, n)
