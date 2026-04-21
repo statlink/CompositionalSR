@@ -1,15 +1,15 @@
-\name{Wald test for the alpha-regression}
-\alias{alfa.wald}
+\name{Hypothesis test for the alpha-regression}
+\alias{alfa.betest}
 \title{
-Wald test for the \eqn{\alpha}-regression
+Hypothesis test for the \eqn{\alpha}-regression
 }
 
 \description{
-Wald test for the \eqn{\alpha}-regression.
+Hypothesis test for the \eqn{\alpha}-regression.
 }
 
 \usage{
-alfa.wald(y, x, a, index = "all", R = 299, ncores)
+alfa.betest(y, x, a, index = "all", R = 499)
 }
 
 \arguments{
@@ -26,22 +26,18 @@ has to be greater than 0.
 }
 \item{index}{
 Whose variable the coefficients to test if they are zero? Either "all", to perform a global (omnibus)
-Wald test or a number indicating the variable.
+test or a number (or a vector) indicating the variable(s).
 }
 \item{R}{
 The number of permutations to perform.
-}
-\item{ncores}{
-The number of cores to use for parallel computations.
 }
 }
 
 \details{
 The \eqn{\alpha}-transformation is applied to the compositional data first and then multivariate
-regression is applied. This involves numerical optimisation. The alfa.reg2() function accepts a
-vector with many values of \eqn{\alpha}, while the the alfa.reg3() function searches for the
-value of \eqn{\alpha} that minimizes the Kulback-Leibler divergence between the observed and
-the fitted compositional values. The functions are highly optimized.
+regression is applied. Then a permutation-based is applied where the test statistic is the SSE if
+an omnibus test is performed or the difference in the SSE between the null and the full model in
+case of a partial test.
 }
 
 \value{
@@ -85,6 +81,6 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 data(fadn)
 y <- fadn[, 3:7]
 x <- fadn[, 8]
-mod <- alfa.reg(y, x, 1)
+mod <- areg(y, x, 1)
 }
 
