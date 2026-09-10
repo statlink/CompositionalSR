@@ -36,7 +36,7 @@ areg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
         ## scalar weight per observation
         w <- Da * za[, k + 1L] * (ha[k + 1L, j] - zh[, j])
         ## block: n x p  (row-wise scaling of ax by w)
-        J[ resid_idx[[j]], beta_idx[[k]] ] <- -w * ax
+        J[ resid_idx[[j]], beta_idx[[k]] ] <-  -w * ax
       }
     }
     J
