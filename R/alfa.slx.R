@@ -22,7 +22,7 @@ alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
   D <- dim(y)[2]
   d <- D - 1  ## dimensionality of the simplex
 
-  if ( a <= 1e-5 ) {
+  if ( abs(a) <= 1e-5 ) {
     mod <- Compositional::comp.reg(y, X[, -1], yb = yb)
     be <- mod$be
 

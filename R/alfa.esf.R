@@ -46,7 +46,7 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
   esf <- spmoran::meigen_f(coords, model = model)
   X <- esf$sf
 
-  if ( a <= 1e-5 ) {
+  if ( abs(a) <= 1e-5 ) {
     mod <- Compositional::comp.reg(y, X[, -1], yb = yb)
     be <- mod$be
 

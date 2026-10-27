@@ -52,7 +52,7 @@ alfa.slx2 <- function(y, x, a, coords, k = 2:15, xnew = NULL, coordsnew, yb = NU
 
     wx <- w %*% x[, -1]
     X <- cbind(x, wx)
-    if ( a <= 1e-5 ) {
+    if ( abs(a) <= 1e-5 ) {
       mod <- Compositional::comp.reg(y, X[, -1], yb = yb)
       bes <- mod$be
 

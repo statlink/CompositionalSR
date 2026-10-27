@@ -20,7 +20,7 @@ rob.alfareg <- function(y, x, a, loss = "welsh", xnew = NULL, yb = NULL) {
   D <- dim(y)[2]
   d <- D - 1  ## dimensionality of the simplex
 
-  if ( a <= 1e-5 ) {
+  if ( abs(a) <= 1e-5 ) {
     mod <- Compositional::comp.reg(y, x[, -1], yb = yb)
     be <- mod$be
 

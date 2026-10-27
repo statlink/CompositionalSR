@@ -36,7 +36,7 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
 
   # Function to fit a single alpha value
   fit_alpha <- function(i) {
-    if ( a[i] <= 1e-4 ) {
+    if ( abs(a[i]) <= 1e-5 ) {
       mod <- Compositional::comp.reg(y, x[, -1], yb = NULL)
       be <- mod$be
     } else {

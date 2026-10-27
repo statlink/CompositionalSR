@@ -37,7 +37,7 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
   n <- dim(x)[1]
   In <- diag(n)
 
-  if ( a <= 1e-5 ) {
+  if ( abs(a) <= 1e-5 ) {
     mod <- Compositional::comp.reg(y, x[, -1], yb = yb)
     be <- mod$be
 
