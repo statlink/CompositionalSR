@@ -50,8 +50,8 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
   x <- model.matrix(ya ~., data.frame(x) )
   ax <- a * x
 
-  n <- dim(y)[1]  ;  D <- dim(y)[2]
-  d <- D - 1  ## dimensionality of the simplex
+  n <- dim(y)[1]  ;  d <- dim(ya)[2]
+  D <- d + 1  ## dimensionality of the simplex
   ha  <- t( Compositional::helm(D) )
   ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
   suppressWarnings({
@@ -113,8 +113,8 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
   x <- model.matrix(ya ~., data.frame(x) )
   ax <- a * x
 
-  n <- dim(y)[1]  ;  D <- dim(y)[2]
-  d <- D - 1  ## dimensionality of the simplex
+  n <- dim(y)[1]  ;  d <- dim(ya)[2]
+  D <- d + 1  ## dimensionality of the simplex
   ha  <- t( Compositional::helm(D) )
   ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
   suppressWarnings({
