@@ -9,7 +9,7 @@ Hypothesis test for the \eqn{\alpha}-regression.
 }
 
 \usage{
-alfa.betest(y, x, a, index = "all", R = 499)
+alfa.betest(y, x, a, index = "all", R = 499, ya = NULL)
 }
 
 \arguments{
@@ -30,6 +30,9 @@ test or a number (or a vector) indicating the variable(s).
 }
 \item{R}{
 The number of permutations to perform.
+}
+\item{ya}{
+If you already have the \eqn{\alpha}-tansformed data pass them here.
 }
 }
 

@@ -1,13 +1,13 @@
-alfa.betest <- function(y, x, a, index = "all", R = 499) {
-  
-  ya <- Compositional::alfa(y, a)$aff
-  
+alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
+
+  if ( is.null(ya) )  ya <- Compositional::alfa(y, a)$aff
+
   if ( identical(class(index), "character" ) ) {
     pvalue <- .alfa.all(ya, x, a, R)
   } else {
     pvalue <- .alfa.index(ya, x, a, index = index, R)
   }
-  pvalue 
+  pvalue
 }
 
 
@@ -49,7 +49,7 @@ alfa.betest <- function(y, x, a, index = "all", R = 499) {
 
   x <- model.matrix(ya ~., data.frame(x) )
   ax <- a * x
-  
+
   n <- dim(y)[1]  ;  D <- dim(y)[2]
   d <- D - 1  ## dimensionality of the simplex
   ha  <- t( Compositional::helm(D) )
@@ -60,10 +60,10 @@ alfa.betest <- function(y, x, a, index = "all", R = 499) {
     })
   m1 <- mod$deviance
 
-  m1b <- numeric(R)  
+  m1b <- numeric(R)
   for ( i in 1:R ) {
-    ind <- rangen::Sample.int(n, n)   
-    yb <- ya[ind, ]   
+    ind <- rangen::Sample.int(n, n)
+    yb <- ya[ind, ]
     suppressWarnings({
     mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
                               ya = yb, ax = ax, a = a, ha = ha, d = d, D = D)
@@ -75,7 +75,7 @@ alfa.betest <- function(y, x, a, index = "all", R = 499) {
 
 
 .alfa.index <- function(ya, x, a, index, R = 499) {
- 
+
   reg <- function(para, ya, ax, a, ha, d, D) {
     be <- matrix(para, ncol = d)
     zz <- cbind( 1, exp(ax %*% be) )
@@ -112,7 +112,7 @@ alfa.betest <- function(y, x, a, index = "all", R = 499) {
 
   x <- model.matrix(ya ~., data.frame(x) )
   ax <- a * x
-  
+
   n <- dim(y)[1]  ;  D <- dim(y)[2]
   d <- D - 1  ## dimensionality of the simplex
   ha  <- t( Compositional::helm(D) )
@@ -122,7 +122,7 @@ alfa.betest <- function(y, x, a, index = "all", R = 499) {
                               ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
     })
   m1 <- mod$deviance
-  
+
   index <- index + 1
   X <- x[, -index]
   aX <- ax[, -index]
@@ -132,16 +132,16 @@ alfa.betest <- function(y, x, a, index = "all", R = 499) {
                               ya = ya, ax = aX, a = a, ha = ha, d = d, D = D)
     })
   m0 <- mod$deviance
-  
-  tobs <- m0 - m1 
-  
+
+  tobs <- m0 - m1
+
   m1b <- numeric(R)
   Z <- x
   aZ <- ax
   for ( i in 1:R ) {
-    ind <- rangen::Sample.int(n, n)   
-    Z[, index] <- x[ind, index]   
-    aZ[, index] <- ax[ind, index] 
+    ind <- rangen::Sample.int(n, n)
+    Z[, index] <- x[ind, index]
+    aZ[, index] <- ax[ind, index]
     ini <- as.vector( solve(crossprod(Z), crossprod(Z, ya) ) )
     suppressWarnings({
     mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
@@ -149,9 +149,8 @@ alfa.betest <- function(y, x, a, index = "all", R = 499) {
     })
     m1b[i] <- mod$deviance
   }
-  
-  ( sum( m0 - m1b > tobs) + 1 ) / (R + 1) 
-}
-  
 
- 
+  ( sum( m0 - m1b > tobs) + 1 ) / (R + 1)
+}
+
+
