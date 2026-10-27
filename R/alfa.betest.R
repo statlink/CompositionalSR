@@ -50,7 +50,7 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
 
   x <- model.matrix(ya ~., data.frame(x) )
   m1b <- numeric(R)
-  n <- dim(y)[1]  ;  d <- dim(ya)[2]
+  n <- dim(ya)[1]  ;  d <- dim(ya)[2]
   D <- d + 1  ## dimensionality of the simplex
 
   if ( abs(a) > 1e-5 ) {
@@ -132,7 +132,7 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
   }
 
   x <- model.matrix(ya ~., data.frame(x) )
-  n <- dim(y)[1]  ;  d <- dim(ya)[2]
+  n <- dim(ya)[1]  ;  d <- dim(ya)[2]
   D <- d + 1  ## dimensionality of the simplex
 
   if ( abs(a) >= 1e-5 ) {
