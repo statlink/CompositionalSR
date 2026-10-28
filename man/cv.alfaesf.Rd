@@ -99,6 +99,5 @@ data(fadn)
 coords <- fadn[, 1:2]
 y <- fadn[, 3:7]
 x <- fadn[, 8]
-mod <- cv.alfaesf(y, x, a = 0.5, coords, nfolds = 5)
 }
 
