@@ -9,10 +9,10 @@ alfa.reg3 <- function(y, x, a = c(-1, 1), xnew = NULL) {
     as.vector(ya - ma)
   }
 
-  reg2 <- function(a, y, ha, x, d, D) {
+  reg2 <- function(a, y, ha, x, xxinv, d, D) {
     ya <- Compositional::alfa(y, a)$aff
     ax <- a * x
-    ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
+    ini <- as.vector( xxinv %*% crossprod(x, ya) )
     suppressWarnings({
       mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
     })
@@ -26,13 +26,14 @@ alfa.reg3 <- function(y, x, a = c(-1, 1), xnew = NULL) {
   D <- dim(y)[2]
   d <- D - 1  ## dimensionality of the simplex
   ha <- t( Compositional::helm(D) )
-  if ( min(y) == 0 )  a <- c(0.001, 1)
+  if ( min(y) == 0 )  a <- c(0.0001, 1)
   ha <- t( Compositional::helm(D) )
+  xxinv <- solve( crossprod(x) )
 
   runtime <- proc.time()
-  a <- optimize(reg2, a, y = y, ha = ha, x = x, d = d, D = D)$minimum
+  a <- optimize(reg2, a, y = y, ha = ha, x = x, xxinv = xxinv, d = d, D = D)$minimum
   runtime <- proc.time() - runtime
-  res <- Compositional::alfa.reg(y = y, x = x[, -1], a = a, xnew = xnew)
+  res <- CompositionalSR::areg(y = y, x = x[, -1], a = a, xnew = xnew)
   res$runtime <- res$runtime + runtime
   res$alfa <- a
   res

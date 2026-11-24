@@ -34,6 +34,8 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
     xnew_prepared <- model.matrix(~., data.frame(xnew) )
   }
 
+  xxinv <- solve(crossprod(x) )
+
   # Function to fit a single alpha value
   fit_alpha <- function(i) {
     if ( abs(a[i]) <= 1e-5 ) {
@@ -42,11 +44,10 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
     } else {
       ya <- Compositional::alfa(y, a[i])$aff
       ax <- a[i] * x
-      ini <- as.vector( solve(crossprod(x), crossprod(x, ya)) )
+      ini <- as.vector( xxinv %*% crossprod(x, ya) )
       suppressWarnings({
-        mod <- minpack.lm::nls.lm(
-          par = ini, fn = reg, ya = ya, ax = ax, a = a[i],
-          ha = ha, d = d, D = D )
+        mod <- minpack.lm::nls.lm( par = ini, fn = reg, ya = ya, ax = ax, a = a[i],
+                                   ha = ha, d = d, D = D )
       })
       be <- matrix(mod$par, ncol = d)
     }
@@ -65,7 +66,7 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
     cl <- parallel::makeCluster(ncores)
     # Export necessary objects and functions
     parallel::clusterExport(cl,
-              varlist = c("y", "x", "a", "xnew_prepared", "ha", "d", "D", "namx", "reg",
+              varlist = c("y", "x", "xxinv", "a", "xnew_prepared", "ha", "d", "D", "namx", "reg",
               "fit_alpha"), envir = environment())
     # Load required packages on each worker
     parallel::clusterEvalQ(cl, {

@@ -18,7 +18,7 @@ cv.gwar <- function(y, x, a = c(0.1, 0.25, 0.5, 0.75, 1), coords, h, nfolds = 10
     ytest <- y[ folds[[ m ]][[ 2 ]], ]
     coordstrain <- coords[folds[[ m ]][[ 1 ]], ]
     coordstest <- coords[folds[[ m ]][[ 2 ]], , drop = FALSE]
-    yest <- gwar.pred(ytrain, xtrain, a, coordstrain, h, xtest, coordstest)$est
+    yest <- CompositionalSR::gwar.pred(ytrain, xtrain, a, coordstrain, h, xtest, coordstest)$est
     for ( i in 1:la ) {
       for ( j in 1:lh ) {
         kl <- ytest * log( ytest / yest[[ i ]][[ j ]] )
