@@ -10,7 +10,7 @@ K-fold cross-validation the \eqn{\alpha}-regression with compositional predictor
 
 \usage{
 cv.alfapcreg(y, x, a = seq(0.1, 1, by = 0.1), k = dim(x)[2] - 2,
-nfolds = 10, folds = NULL, seed = NULL)
+nfolds = 10, folds = NULL)
 }
 
 \arguments{
@@ -34,9 +34,6 @@ The number of folds to split the data.
 }
 \item{folds}{
 If you have the list with the folds supply it here. You can also leave it NULL and it will create folds.
-}
-\item{seed}{
-You can specify your own seed number here or leave it NULL.
 }
 }
 

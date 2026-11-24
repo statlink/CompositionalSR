@@ -9,8 +9,7 @@ K-fold cross-validation for the \eqn{\alpha}-regression.
 }
 
 \usage{
-cv.alfareg(y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10,
-folds = NULL, nc = 1, seed = NULL)
+cv.alfareg(y, x, a = seq(0.1, 1, by = 0.1), nfolds = 10, folds = NULL, nc = 1)
 }
 
 \arguments{
@@ -31,9 +30,6 @@ If you have the list with the folds supply it here. You can also leave it NULL a
 }
 \item{nc}{
 The number of cores to use. IF you have a multicore computer it is advisable to use more than 1. It makes the procedure faster. It is advisable to use it if you have many observations and or many variables, otherwise it will slow down th process.
-}
-\item{seed}{
-You can specify your own seed number here or leave it NULL.
 }
 }
 

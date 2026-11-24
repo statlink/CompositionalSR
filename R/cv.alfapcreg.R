@@ -1,10 +1,9 @@
-cv.alfapcreg <- function( y, x, a = seq(0.1, 1, by = 0.1), k = dim(x)[2] - 2, nfolds = 10, folds = NULL, seed = NULL ) {
+cv.alfapcreg <- function( y, x, a = seq(0.1, 1, by = 0.1), k = dim(x)[2] - 2, nfolds = 10, folds = NULL) {
   if ( min(y) == 0 )  a <- a[ a > 0 ]
   la <- length(a)
   n <- dim(y)[1]
   ina <- 1:n
-  if ( is.null(folds) )  folds <- Compositional::makefolds(ina, nfolds = nfolds,
-                                                           stratified = FALSE, seed = seed)
+  if ( is.null(folds) )  folds <- Compositional::makefolds(ina, nfolds = nfolds, stratified = FALSE)
   nfolds <- length(folds)
   apa <- proc.time()
   kula <- matrix(nrow = nfolds, ncol = k)
