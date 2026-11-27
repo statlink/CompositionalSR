@@ -89,6 +89,6 @@ data(fadn)
 coords <- fadn[1:50, 1:2]
 y <- fadn[1:50, 3:7]
 x <- fadn[1:50, 8]
-mod <- cv.alfaslx(y, x, a = 0.5, coords, k = 2)
+mod <- cv.alfaslx(y, x, a = 1, coords, k = 2)
 }
 
