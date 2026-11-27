@@ -73,7 +73,7 @@ R implementation and documentation: Michail Tsagris \email{mtsagris@uoc.gr}.
 \examples{
 data(fadn)
 y <- fadn[, 3:7]
-x <- fadn[, 8]
+x <- as.matrix(fadn[, 8])
 mod <- alfa.reg(y, x, 0.2, xnew = x)
 me <- me.ar(mod$be, mod$est, x)
 }
