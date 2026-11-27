@@ -5,7 +5,7 @@ importFrom("Rfast", rowsums, rowOrder, colmeans, rowMins, Dist, dista, eachcol.a
 importFrom("stats", model.matrix, as.formula, coef, optimize, optim, quantile, prcomp)
 importFrom("graphics", legend, lines, mtext)
 importFrom("rangen", Sample)
-importFrom("minpack.lm", nls.lm)
+importFrom("minpack.lm", nls.lm, nls.lm.control)
 importFrom("sf", st_as_sf)
 importFrom("blockCV", cv_spatial)
 importFrom("gslnls", gsl_nls, gsl_nls_control)
