@@ -39,8 +39,7 @@ rob.alfareg <- function(y, x, a, loss = "welsh", xnew = NULL, yb = NULL) {
 
   est <- NULL
   if ( !is.null(xnew) ) {
-    xnew <- as.matrix(xnew)
-    if ( dim(xnew)[1] == 1 )  xnew <- t(xnew)
+    if ( is.vector(xnew) )  xnew <- matrix(xnew, ncol = dim(x)[2] - 1)
     xnew <- model.matrix(~., data.frame(xnew) )
     est <- cbind( 1, exp(xnew %*% be) )
     est <- est/Rfast::rowsums(est)

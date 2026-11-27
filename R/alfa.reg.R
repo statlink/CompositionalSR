@@ -24,9 +24,16 @@ alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
   } else  ya <- yb
   x <- model.matrix(ya ~., data.frame(x) )
   ax <- a * x
-
   D <- dim(y)[2]
   d <- D - 1  ## dimensionality of the simplex
+
+  if ( is.null( colnames(x) ) ) {
+    p <- dim(x)[2] - 1
+    namx <- c("constant", paste("X", 1:p, sep = "") )
+  } else  namx <- c("constant", colnames(x)[-1] )
+  if ( is.null( colnames(y) ) ) {
+    namy <- paste("Y", 2:D, sep = "")
+  } else  namy <- colnames(y)[-1]
 
   if ( abs(a) <= 1e-5 ) {
     mod <- Compositional::comp.reg(y, x[, -1], yb = yb)
@@ -54,21 +61,16 @@ alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
     est <- est/Rfast::rowsums(est)
   }
 
-  if ( is.null( colnames(x) ) ) {
-    p <- dim(x)[2] - 1
-    rownames(be) <- c("constant", paste("X", 1:p, sep = "") )
-  } else  rownames(be) <- c("constant", colnames(x)[-1] )
-  colnames(be) <- paste("Y", 2:D, sep = "")
-
   if ( covb ) {
     res <- optim( as.vector(be), .regar, ya = ya, ax = ax, a = a, ha = ha, d = d,
                   D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 5000) )
     covbe <- solve(res$hessian)
-    a2 <- colnames(x)
-    a1 <- colnames(be)
-    nam <- as.vector( t( outer(a1, a2, paste, sep = ":") ) )
+    nam <- as.vector( t( outer(namx, namy, paste, sep = ":") ) )
     colnames(covbe) <- rownames(covbe) <- nam
-  } else covbe <- NULL
+  } else  covbe <- NULL
+
+  rownames(be) <- namx
+  colnames(be) <- namy
 
   list(runtime = runtime, be = be, covbe = covbe, dev = mod$deviance, est = est)
 }

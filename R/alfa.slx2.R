@@ -39,6 +39,7 @@ alfa.slx2 <- function(y, x, a, coords, k = 2:15, xnew = NULL, coordsnew, yb = NU
   Wnew <- 1 / Wnew
   Wnew[ is.infinite(Wnew) ] <- 0
 
+  if ( is.vector(xnew) )  xnew <- matrix(xnew, ncol = dim(x)[2] - 1)
   xnew <- model.matrix(~., data.frame(xnew) )
 
   for ( i in k )  {

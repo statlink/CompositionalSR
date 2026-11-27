@@ -82,7 +82,8 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
   est <- NULL
   if ( !is.null(xnew) ) {
     esfnew <- NULL
-    if ( length(sela) > 0 )  esfnew <- spmoran::meigen0(meig = esf, coords0 = coordsnew)$sf[, sela]
+    if ( length(sela) > 0 )  esfnew <- spmoran::meigen0(meig = esf, coords0 = coordsnew)$sf[, sela, drop = FALSE]
+    if ( is.vector(xnew) )  xnew <- matrix(xnew, ncol = dim(x)[2] - 1)
     xnew <- model.matrix(~., data.frame(xnew) )
     xnew <- cbind(xnew, esfnew)
     est <- cbind( 1, exp(xnew %*% be) )

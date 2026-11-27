@@ -29,7 +29,6 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
     ya <- Compositional::alfa(y, a)$aff
   } else  ya <- yb
   x <- model.matrix( ya ~., data.frame(x) )
-
   ax <- a * x
 
   D <- dim(y)[2]
@@ -74,6 +73,7 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
 
   est <- NULL
   if ( !is.null(xnew) ) {
+    if ( is.vector(xnew) )  xnew <- matrix(xnew, ncol = dim(x)[2] - 1)
     xnew <- model.matrix(~., data.frame(xnew) )
     Xaug <- rbind(x, xnew)
     Inm <- diag( dim(Xaug)[1] )

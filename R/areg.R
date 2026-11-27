@@ -76,7 +76,7 @@ areg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
 
   est <- NULL
   if ( !is.null(xnew) ) {
-    if ( dim(xnew)[1] == 1 )  xnew <- t(xnew)
+    if ( is.vector(xnew) )  xnew <- matrix(xnew, ncol = dim(x)[2] - 1)
     xnew <- model.matrix(~., data.frame(xnew) )
     est <- cbind( 1, exp(xnew %*% be) )
     est <- est/Rfast::rowsums(est)

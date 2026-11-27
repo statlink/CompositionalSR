@@ -8,7 +8,12 @@ alfa.pcreg <- function(y, x, a, k, xnew = NULL, yb = NULL) {
 
   pca <- prcomp(xa, center = FALSE, scale. = FALSE, rank. = k)
   xa <- pca$x
-  if ( !is.null(xnew) )  xnew <- Compositional::alfa(xnew, a)$aff %*% pca$rotation
+
+  if ( !is.null(xnew) )  {
+    if ( is.vector(xnew) )  xnew <- matrix(xnew, ncol = dim(x)[2] - 1)
+    xnew <- Compositional::alfa(xnew, a)$aff %*% pca$rotation
+  }
+
   mod <- CompositionalSR::areg(y, xa, a, xnew = xnew, yb = ya)
   runtime <- proc.time() - runtime
   mod$runtime <- runtime

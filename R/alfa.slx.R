@@ -41,6 +41,8 @@ alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
 
   est <- NULL
   if ( !is.null(xnew) ) {
+    if ( is.vector(xnew) )  xnew <- matrix(xnew, ncol = dim(x)[2] - 1)
+    if ( is.vector(coordsnew) )  coordsnew <- matrix(coordsnew, ncol = 2)
     cordsnew <- pi * coordsnew / 180  ## from degrees to rads
     a1 <- sin(cordsnew[, 1])
     coordnew <- cbind( cos(cordsnew[, 1]), a1 * cos(cordsnew[, 2]), a1 * sin(cordsnew[, 2]) )

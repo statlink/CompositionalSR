@@ -16,23 +16,17 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
   x <- model.matrix(y ~., data.frame(x))
   ha <- t( Compositional::helm(D) )
 
+  if ( min(y ) == 0)  a <- a[a > 0]
+  la <- length(a)
+  xxinv <- solve(crossprod(x) )
+
   if ( is.null( colnames(x) ) ) {
     p <- dim(x)[2] - 1
     namx <- c("constant", paste("X", 1:p, sep = "") )
   } else  namx <- c("constant", colnames(x)[-1] )
-
-  if ( min(y ) == 0)  a <- a[a > 0]
-  la <- length(a)
-
-  # Prepare xnew if provided
-  xnew_prepared <- NULL
-  if (!is.null(xnew)) {
-    xnew <- as.matrix(xnew)
-    if (dim(xnew)[1] == 1)  xnew <- t(xnew)
-    xnew_prepared <- model.matrix(~., data.frame(xnew) )
-  }
-
-  xxinv <- solve(crossprod(x) )
+  if ( is.null( colnames(y) ) ) {
+    namy <- paste("Y", 2:D, sep = "")
+  } else  namy <- colnames(y)[-1]
 
   # Function to fit a single alpha value
   fit_alpha <- function(i) {
@@ -51,11 +45,14 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
     }
 
     est <- NULL
-    if ( !is.null(xnew_prepared) ) {
-      est <- cbind( 1, exp(xnew_prepared %*% be) )
+    if ( !is.null(xnew) ) {
+      if ( dim(xnew)[1] == 1 )  xnew <- t(xnew)
+      xnew <- model.matrix(~., data.frame(xnew) )
+      est <- cbind( 1, exp(xnew %*% be) )
       est <- est / Rfast::rowsums(est)
     }
     rownames(be) <- namx
+    colnames(be) <- namy
     list(be = be, est = est)
   }
 
@@ -64,7 +61,7 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
     cl <- parallel::makeCluster(ncores)
     # Export necessary objects and functions
     parallel::clusterExport( cl, varlist = c( "y", "x", "xxinv", "a", "xnew_prepared", "ha", "d",
-                             "D", "namx", "reg", "fit_alpha" ), envir = environment() )
+                             "D", "namx", "namy", "reg", "fit_alpha" ), envir = environment() )
     # Load required packages on each worker
     parallel::clusterEvalQ(cl, {
       library(Compositional)

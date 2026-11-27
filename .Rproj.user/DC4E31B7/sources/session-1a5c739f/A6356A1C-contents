@@ -1,0 +1,84 @@
+ait.reg <- function(y, x, a, xnew = NULL, yb = NULL) {
+
+  reg <- function(para, ya, x, a, d, ha) {
+    be <- matrix(para, ncol = d)
+    zz <- cbind( 1, exp(x %*% be) )
+    mu <- zz / rowSums(zz)
+    ma <- CompositionalPR::ait(mu, a)
+    as.vector( ya - ma )
+  }
+
+  ## analytical Jacobian of reg():  (n*d) x (p*d)
+  jac <- function(para, ya, x, a, d, ha) {
+    n <- dim(x)[1]   ;   p <- dim(x)[2]
+    be <- matrix(para, ncol = d)
+    zz <- cbind( 1, exp(x %*% be) )
+    mu <- zz / rowSums(zz)
+    mua <- mu^a
+    J <- matrix(0, nrow = n * d, ncol = p * d)
+    for ( k in 1:d ) {
+      w <-  -mua * mu[, k + 1]
+      w[, k + 1] <- w[, k + 1] + mua[, k + 1]
+      w <- tcrossprod(w, ha)   ## n x d
+      ck <- ( (k - 1) * p + 1 ):(k * p)
+      for ( j in 1:d ) {
+        rj <- ( (j - 1) * n + 1 ):(j * n)
+        J[rj, ck] <-  -w[, j] * x
+      }
+    }
+    J
+  }
+
+  runtime <- proc.time()
+
+  if ( abs(a) <= 1e-5 )  a <- 0
+  D <- dim(y)[2]
+  d <- D - 1  ## dimensionality of the simplex
+  ha <- Compositional::helm(D)
+  x <- model.matrix( ~., data.frame(x) )
+
+  if ( is.null(yb) ) {
+    ya <- CompositionalPR::ait(y, a)
+  } else  ya <- yb   ## must be the alpha-transformed data, ait(y, a)
+
+  if ( is.null( colnames(x) ) ) {
+    p <- dim(x)[2] - 1
+    namx <- c("constant", paste("X", 1:p, sep = "") )
+  } else  namx <- c("constant", colnames(x)[-1] )
+  if ( is.null( colnames(y) ) ) {
+    namy <- paste("Y", 2:D, sep = "")
+  } else  namy <- colnames(y)[-1]
+
+  if ( a == 0 ) {
+    ## z(mu) = log(mu) %*% t(H) = ilr(mu) = [0, x %*% be] %*% t(H) is linear in be,
+    ## so the least squares fit is the OLS of alr(y) on x (exact, no iterations)
+    y0 <- ya %*% ha                ## back to clr, since t(H) %*% H = I - J/D
+    y0 <- y0[, -1] - y0[, 1]       ## alr (works also when yb is supplied)
+    be <- solve( crossprod(x), crossprod(x, y0) )
+    be <- matrix(be, ncol = d)
+    zz <- cbind( 1, exp(x %*% be) )
+    dev <- sum( ( ya - CompositionalPR::ait(zz / rowSums(zz), 0) )^2 )
+
+  } else {
+    ini <- as.vector( solve( crossprod(x), crossprod(x, ya) ) )
+    mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac, ya = ya, x = x, a = a, d = d, ha = ha,
+                              control = minpack.lm::nls.lm.control(maxiter = 1000) )
+    be <- matrix(mod$par, ncol = d)
+    dev <- mod$deviance
+  }  ## end if (a == 0)
+
+  runtime <- proc.time() - runtime
+
+  est <- NULL
+  if ( !is.null(xnew) ) {
+    if ( is.vector(xnew) )  xnew <- matrix(xnew, ncol = dim(x)[2] - 1)
+    xnew <- model.matrix(~., data = as.data.frame(xnew) )
+    est <- cbind( 1, exp(xnew %*% be) )
+    est <- est / Rfast::rowsums(est)
+  }
+
+  rownames(be) <- namx
+  colnames(be) <- namy
+
+  list(runtime = runtime, be = be, dev = dev, est = est)
+}

@@ -6,7 +6,7 @@ alfareg.nr <- function(y, x, alpha = 1, beta_init = NULL, max_iter = 100,
   n <- nrow(x);  D <- ncol(y);  d <- D - 1L;  p <- ncol(x)
   total_params <- d * p
 
-  if (is.null(beta_init)) {
+  if ( is.null(beta_init) ) {
     beta_vec <- rep(0, total_params)
   } else beta_vec <- beta_init
 
