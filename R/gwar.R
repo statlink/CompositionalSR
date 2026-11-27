@@ -16,7 +16,8 @@ gwar <- function(y, x, a, coords, h, yb = NULL, nc = 1) {
       ind <- which(wei > 1e-6)
       suppressWarnings( {
         mod <- minpack.lm::nls.lm( par = ini, fn = regwei, ya = ya[ind, ], ax = ax[ind, ], a = a,
-                                   wei = wei[ind], ha = ha, d = d, D = D )
+                                   wei = wei[ind], ha = ha, d = d, D = D,
+                                   control = minpack.lm::nls.lm.control(maxiter = 1000) )
       } )
       be2 <- matrix(mod$par, ncol = d)
       est2 <- cbind( 1, exp(x[i, ] %*% be2) )
@@ -54,7 +55,8 @@ gwar <- function(y, x, a, coords, h, yb = NULL, nc = 1) {
       cl <- parallel::makePSOCKcluster(nc)
       on.exit( parallel::stopCluster(cl), add = TRUE )
       ep <- parallel::parLapply( cl, 1:n, locfit, coord = coord, ya = ya, x = x, ax = ax, a = a,
-                                 h = h, ha = ha, d = d, D = D, ini = ini, regwei = regwei )
+                                 h = h, ha = ha, d = d, D = D, ini = ini, regwei = regwei,
+                                 control = minpack.lm::nls.lm.control(maxiter = 1000) )
     }
     ep <- do.call(rbind, ep)
     be <- ep[, 1:(p * d), drop = FALSE]

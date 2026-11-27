@@ -14,7 +14,8 @@ alfa.reg3 <- function(y, x, a = c(-1, 1), xnew = NULL) {
     ax <- a * x
     ini <- as.vector( xxinv %*% crossprod(x, ya) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = ax, a = a, ha = ha, d = d, D = D,
+                                control = minpack.lm::nls.lm.control(maxiter = 1000) )
     })
     be <- matrix(mod$par, ncol = d)
     est <- cbind( 1, exp(x %*% be) )

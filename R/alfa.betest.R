@@ -58,8 +58,8 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
     ha <- t( Compositional::helm(D) )
     ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
-                                ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac, ya = ya, ax = ax, a = a, ha = ha,
+                                d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000) )
      })
     m1 <- mod$deviance
 
@@ -67,8 +67,8 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
       ind <- rangen::Sample.int(n, n)
       yb <- ya[ind, ]
       suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
-                                ya = yb, ax = ax, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac, ya = yb, ax = ax, a = a, ha = ha,
+                                d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000) )
       })
       m1b[i] <- mod$deviance
     }
@@ -140,8 +140,8 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
     ha  <- t( Compositional::helm(D) )
     ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
-                                ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac, ya = ya, ax = ax, a = a, ha = ha,
+                                d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000) )
       })
     m1 <- mod$deviance
 
@@ -150,8 +150,8 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
     aX <- ax[, -index]
     ini <- as.vector( solve(crossprod(X), crossprod(X, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
-                                ya = ya, ax = aX, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac, ya = ya, ax = aX, a = a, ha = ha,
+                                d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000) )
       })
     m0 <- mod$deviance
 
@@ -166,8 +166,8 @@ alfa.betest <- function(y, x, a, index = "all", R = 499, ya = NULL) {
       aZ[, index] <- ax[ind, index]
       ini <- as.vector( solve(crossprod(Z), crossprod(Z, ya) ) )
       suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
-                                ya = ya, ax = aZ, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac, ya = ya, ax = aZ, a = a, ha = ha,
+                                d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000) )
       })
       m1b[i] <- mod$deviance
     }

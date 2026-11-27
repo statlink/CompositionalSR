@@ -44,8 +44,8 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
       ax <- a[i] * x
       ini <- as.vector( xxinv %*% crossprod(x, ya) )
       suppressWarnings({
-        mod <- minpack.lm::nls.lm( par = ini, fn = reg, ya = ya, ax = ax, a = a[i],
-                                   ha = ha, d = d, D = D )
+        mod <- minpack.lm::nls.lm( par = ini, fn = reg, ya = ya, ax = ax, a = a[i], ha = ha,
+                                   d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000)  )
       })
       be <- matrix(mod$par, ncol = d)
     }
@@ -63,9 +63,8 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
   if ( ncores > 1 ) {
     cl <- parallel::makeCluster(ncores)
     # Export necessary objects and functions
-    parallel::clusterExport(cl,
-              varlist = c("y", "x", "xxinv", "a", "xnew_prepared", "ha", "d", "D", "namx", "reg",
-              "fit_alpha"), envir = environment())
+    parallel::clusterExport( cl, varlist = c( "y", "x", "xxinv", "a", "xnew_prepared", "ha", "d",
+                             "D", "namx", "reg", "fit_alpha" ), envir = environment() )
     # Load required packages on each worker
     parallel::clusterEvalQ(cl, {
       library(Compositional)

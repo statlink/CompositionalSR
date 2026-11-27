@@ -44,7 +44,7 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
   } else {
     ha <- t( Compositional::helm(D) )
     p <- dim(x)[2]
-    ini <- as.vector( CompositionalSR::alfa.reg(y, x[, -1], a, yb = ya)$be )
+    ini <- as.vector( CompositionalSR::areg(y, x[, -1], a, yb = ya)$be )
     r <- seq(-0.9, 0.9, by = 0.2)
     bes <- matrix(nrow = length(r), ncol = d * p)
     dev <- numeric( length(r) )
@@ -52,7 +52,8 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
       for ( j in 1:length(r) ) {
         ## sw <- spatialreg::invIrW(x = W, rho = r[j], method = "solve", feasible = NULL)
         sw <- solve( In - r[j] * W )
-        mod1 <- minpack.lm::nls.lm(par = ini, fn = regarho, ya = ya, sw = sw, ax = ax, a = a, ha = ha, d = d, D = D)
+        mod1 <- minpack.lm::nls.lm( par = ini, fn = regarho, ya = ya, sw = sw, ax = ax, a = a, ha = ha, d = d, D = D,
+                                    control = minpack.lm::nls.lm.control(maxiter = 1000) )
         bes[j, ] <- mod1$par
         dev[j] <- mod1$deviance
       }
@@ -64,7 +65,8 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
       } else bou <- c( max(-1, r[ind] - 0.2), r[ind] + 0.2 )
       mod <- minpack.lm::nls.lm( par = c(r[ind], bes[ind, ] ), fn = rega, ya = ya, W = W, ax = ax, a = a, In = In, ha = ha, d = d, D = D,
                                  lower = c(bou[1], rep(-Inf, p * d) ),
-                                 upper = c(bou[2], rep(Inf, p * d) ) )
+                                 upper = c(bou[2], rep(Inf, p * d) ),
+                                 control = minpack.lm::nls.lm.control(maxiter = 1000) )
     })
     rho <- mod$par[1]
     be <- matrix(mod$par[-1], ncol = d)
@@ -101,7 +103,7 @@ alfa.sar <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
   if ( covb ) {
     res <- optim( c(rho, as.vector(be)), .regsar, ya = ya, W = W, ax = ax, a = a,
                   In = In, ha = ha, d = d, D = D, hessian = TRUE, method = "BFGS",
-                  control = list(maxit = 1000) )
+                  control = list(maxit = 5000) )
     covbe <- solve(res$hessian)
     diag(covbe) <- abs( diag(covbe) )
     a2 <- colnames(x)

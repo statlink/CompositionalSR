@@ -65,8 +65,8 @@ areg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
     ha  <- t( Compositional::helm(D) )
     ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
-                                ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac, ya = ya, ax = ax, a = a, ha = ha,
+                                d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000) )
     })
     be <- matrix(mod$par, ncol = d)
     dev <- mod$deviance

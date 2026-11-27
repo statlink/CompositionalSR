@@ -36,7 +36,8 @@ alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
     ha <- t( Compositional::helm(D) )
     ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = ax, a = a, ha = ha, d = d, D = D,
+                                control = minpack.lm::nls.lm.control(maxiter = 1000) )
 
     })
     be <- matrix(mod$par, ncol = d)
@@ -61,7 +62,7 @@ alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
 
   if ( covb ) {
     res <- optim( as.vector(be), .regar, ya = ya, ax = ax, a = a, ha = ha, d = d,
-                  D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 1000) )
+                  D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 5000) )
     covbe <- solve(res$hessian)
     a2 <- colnames(x)
     a1 <- colnames(be)

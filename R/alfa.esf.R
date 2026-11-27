@@ -55,8 +55,8 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
     ha <- t( Compositional::helm(D) )
     ini <- as.vector( solve(crossprod(x), crossprod(x, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac,
-                                ya = ya, ax = ax, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac = jac, ya = ya, ax = ax, a = a, ha = ha,
+                                d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000) )
     })
 
     be <- matrix(mod$par, ncol = d)
@@ -70,7 +70,8 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
     aX <- cbind(a * x, a * X[, sela] )
     ini <- as.vector( solve(crossprod(aX), crossprod(aX, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac =jac, ya = ya, ax = aX, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, jac =jac, ya = ya, ax = aX, a = a, ha = ha,
+                                d = d, D = D, control = minpack.lm::nls.lm.control(maxiter = 1000) )
     })
     be <- matrix(mod$par, ncol = d)
 
@@ -109,7 +110,7 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
 
   if ( covb ) {
     res <- optim( as.vector( rbind(be, gama) ), .regar, ya = ya, ax = aX, a = a, ha = ha, d = d,
-                  D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 1000) )
+                  D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 5000) )
     covbe <- solve(res$hessian)
     a2 <- c( colnames(x), colnames(X.esf) )
     a1 <- colnames(be)
@@ -146,9 +147,7 @@ alfa.esf <- function(y, x, a, coords, model = "exp", covb = FALSE, xnew = NULL, 
      i <- i + 1
      res <- ya - Compositional::alfa(est, a)$aff
      klc <- rep(-Inf, p)
-     for ( j in ind[-sel] ) {
-       klc[j] <- mean( Rfast::eachcol.apply(res, X[, j])^2 )
-     }
+     for ( j in ind[-sel] )  klc[j] <- mean( Rfast::eachcol.apply(res, X[, j])^2 )
      sel <- c(sel, which.max(klc) )
      z <- cbind(x, X[, sel])
      mod <- CompositionalSR::areg(y, z, a, xnew = z, yb = ya)

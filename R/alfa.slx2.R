@@ -60,7 +60,8 @@ alfa.slx2 <- function(y, x, a, coords, k = 2:15, xnew = NULL, coordsnew, yb = NU
       aX <- a * X
       ini <- as.vector( solve(crossprod(X), crossprod(X, ya) ) )
       suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = aX, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = aX, a = a, ha = ha, d = d, D = D,
+                                control = minpack.lm::nls.lm.control(maxiter = 1000) )
       })
       bes <- matrix(mod$par, ncol = d)
     }  ## end if (a == 0)

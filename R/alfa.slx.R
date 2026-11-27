@@ -31,7 +31,8 @@ alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
     ha <- t( Compositional::helm(D) )
     ini <- as.vector( solve(crossprod(X), crossprod(X, ya) ) )
     suppressWarnings({
-      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = aX, a = a, ha = ha, d = d, D = D)
+      mod <- minpack.lm::nls.lm(par = ini, fn = reg, ya = ya, ax = aX, a = a, ha = ha, d = d, D = D,
+                                control = minpack.lm::nls.lm.control(maxiter = 1000) )
     })
     be <- matrix(mod$par, ncol = d)
   }  ## end if (a == 0)
@@ -75,7 +76,7 @@ alfa.slx <- function(y, x, a, coords, k = 10, covb = FALSE, xnew = NULL, coordsn
 
   if ( covb ) {
     res <- optim( as.vector(mod$par), .regar, ya = ya, ax = aX, a = a, ha = ha, d = d,
-                    D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 1000) )
+                    D = D, hessian = TRUE, method = "BFGS", control = list(maxit = 5000) )
     covbe <- solve(res$hessian)
     a2 <- rownames( rbind(be, gama) )
     a1 <- colnames(be)
