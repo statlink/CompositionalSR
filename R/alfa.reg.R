@@ -47,7 +47,6 @@ alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
 
   est <- NULL
   if ( !is.null(xnew) ) {
-    xnew <- as.matrix(xnew)
     if ( dim(xnew)[1] == 1 )  xnew <- t(xnew)
     xnew <- model.matrix(~., data.frame(xnew) )
     est <- cbind( 1, exp(xnew %*% be) )
@@ -57,9 +56,7 @@ alfa.reg <- function(y, x, a, covb = FALSE, xnew = NULL, yb = NULL) {
   if ( is.null( colnames(x) ) ) {
     p <- dim(x)[2] - 1
     rownames(be) <- c("constant", paste("X", 1:p, sep = "") )
-  } else {
-    rownames(be) <- c("constant", colnames(x)[-1] )
-  }
+  } else  rownames(be) <- c("constant", colnames(x)[-1] )
   colnames(be) <- paste("Y", 2:D, sep = "")
 
   if ( covb ) {

@@ -19,9 +19,7 @@ alfa.reg2 <- function(y, x, a, xnew = NULL, ncores = 1) {
   if ( is.null( colnames(x) ) ) {
     p <- dim(x)[2] - 1
     namx <- c("constant", paste("X", 1:p, sep = "") )
-  } else {
-    namx <- c("constant", colnames(x)[-1] )
-  }
+  } else  namx <- c("constant", colnames(x)[-1] )
 
   if ( min(y ) == 0)  a <- a[a > 0]
   la <- length(a)
